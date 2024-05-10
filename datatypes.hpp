@@ -1,5 +1,27 @@
 #include <cstdint>
 #include <set>
+#include <iostream>
+#include <cmath>
+
+// Interfaz Expresion
+class Expresion {
+public:
+    virtual double evaluar() const = 0;
+    virtual ~Expresion() {}
+};
+
+// Implementación de expresión Seno
+class Seno : public Expresion {
+private:
+    Expresion* expresionInterior; // Expresión dentro del seno
+
+public:
+    Seno(Expresion* exp) : expresionInterior(exp) {}
+
+    double evaluar() const override {
+        return std::sin(expresionInterior->evaluar());
+    }
+};
 
 class Matrix {
 
@@ -21,15 +43,17 @@ class SetOfPoints {
 
 private:
     std::set<Point> points_set;
-
 };
 
 class Equation {
-
+    std::string rigth_side_exp;
+    std::string left_side_exp;
 };
 
 class Function {
 
+private:
+    std::string exp;
 };
 
 class SystemOfEquations {
