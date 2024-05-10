@@ -2,45 +2,70 @@
 #include <memory>
 #include <vector>
 
-enum DataType
+enum class DataType
 {
-    Operation,
-    
+    Pair,
+    Vector,
+    Matrix,
+    Number,
+    Letter
 };
 
-class Expresion
+class Expression
 {
 public:
-    virtual std::shared_ptr<Value> eval() const = 0;
-    virtual ~Expresion() {}
+    virtual std::shared_ptr<Expression> eval() const = 0;
+    virtual ~Expression() {}
 };
 
-class Value : public Expresion
+class Value : public Expression
 {
 protected:
     DataType dataType;
 public:
     Value(DataType type) : dataType{type} {}
+    DataType getDataType() const
+    {
+        return dataType;
+    }
 };
 
-class UnaryExpresion : public Expresion
+class UnaryExpression : public Expression
 {
 protected:
-    std::shared_ptr<Expresion> expresion;
+    std::shared_ptr<Expression> expression;
 
 public:
-    UnaryExpresion(std::shared_ptr<Expresion> exp) : expresion{exp} {}
+    UnaryExpression(std::shared_ptr<Expression> exp) : expression{exp} {}
 };
 
-class BinaryExpresion : public Expresion
+class BinaryExpression : public Expression
 {
 
 protected:
-    std::shared_ptr<Expresion> leftExpresion;
-    std::shared_ptr<Expresion> rigthExpresion;
+    std::shared_ptr<Expression> leftExpression;
+    std::shared_ptr<Expression> rigthExpression;
 
 public:
-    BinaryExpresion(std::shared_ptr<Expresion> left, std::shared_ptr<Expresion> rigth) : leftExpresion{left}, rigthExpresion{rigth} {};
+    BinaryExpression(std::shared_ptr<Expression> left, std::shared_ptr<Expression> rigth) : leftExpression{left}, rigthExpression{rigth} {};
+};
+
+class Letter : public Value
+{
+protected:
+    char letter;
+public:
+    Letter(char lett) : Value(DataType::Letter), letter{lett} {}
+
+    std::shared_ptr<Expression> eval() const override
+    {
+        return std::make_shared<Letter>(letter);
+    }
+
+    double getLetter() const
+    {
+        return letter;
+    }
 };
 
 class Number : public Value
@@ -49,9 +74,9 @@ protected:
     double number;
 
 public:
-    Number(double num) : number{num} {}
+    Number(double num) : Value(DataType::Number), number{num} {}
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
         return std::make_shared<Number>(number);
     }
@@ -62,16 +87,23 @@ public:
     }
 };
 
-
-// known Expresions
-class Addition : public BinaryExpresion {
+// known Expressions
+class Addition : public BinaryExpression {
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -83,15 +115,22 @@ public:
     }
 };
 
-class Subtraction : public BinaryExpresion {
+class Subtraction : public BinaryExpression {
 
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -103,15 +142,22 @@ public:
     }
 };
 
-class Multiplication : public BinaryExpresion {
+class Multiplication : public BinaryExpression {
 
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -123,15 +169,22 @@ public:
     }
 };
 
-class Division : public BinaryExpresion {
+class Division : public BinaryExpression {
 
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -143,15 +196,22 @@ public:
     }
 };
 
-class Power : public BinaryExpresion {
+class Power : public BinaryExpression {
 
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -163,14 +223,20 @@ public:
     }
 };
 
-class NaturalLogarithm : public UnaryExpresion {
+class NaturalLogarithm : public UnaryExpression {
 
 public:
-    using UnaryExpresion::UnaryExpresion;
+    using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expresion->eval();
+        auto exp1 = expression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        if(element1->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<NaturalLogarithm>(exp1);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         if (num1 == nullptr)
         {
@@ -181,15 +247,22 @@ public:
     }
 };
 
-class Logarithm : public BinaryExpresion {
+class Logarithm : public BinaryExpression {
 
 public:
-    using BinaryExpresion::BinaryExpresion;
+    using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
@@ -201,14 +274,20 @@ public:
     }
 };
 
-class Sine : public UnaryExpresion {
+class Sine : public UnaryExpression {
 
 public:
-    using UnaryExpresion::UnaryExpresion;
+    using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expresion->eval();
+       auto exp1 = expression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        if(element1->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Sine>(exp1);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         if (num1 == nullptr)
         {
@@ -219,31 +298,43 @@ public:
     }
 };
 
-class Cosine : public UnaryExpresion {
+class Cosine : public UnaryExpression {
 
 public:
-    using UnaryExpresion::UnaryExpresion;
+    using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expresion> eval() const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expresion->eval();
+        auto exp1 = expression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        if(element1->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Cosine>(exp1);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         if (num1 == nullptr)
         {
             return nullptr;
         }
-        double result = std::sin(num1->getNumber());
+        double result = std::cos(num1->getNumber());
         return std::make_shared<Number>(result);
     }
 };
 
-class Tangent : public UnaryExpresion {
+class Tangent : public UnaryExpression {
 
 public:
-    using UnaryExpresion::UnaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
+    using UnaryExpression::UnaryExpression;
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expresion->eval();
+        auto exp1 = expression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        if(element1->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Tangent>(exp1);
+        }
+
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         if (num1 == nullptr)
         {
@@ -254,12 +345,17 @@ public:
     }
 };
 
-class Cotangent : public UnaryExpresion {
+class Cotangent : public UnaryExpression {
 public:
-    using UnaryExpresion::UnaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
+    using UnaryExpression::UnaryExpression;
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expresion->eval();
+        auto exp1 = expression->eval();
+        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        if(element1->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Cotangent>(exp1);
+        }
         auto num1 = std::dynamic_pointer_cast<Number>(exp1);
         if (num1 == nullptr)
         {
@@ -270,34 +366,37 @@ public:
     }
 };
 
-// Expresions for our language
-class Pair : public BinaryExpresion
+// Expressions for our language
+class Pair : public Value
 {
+private:
+    std::shared_ptr<Expression> first;
+    std::shared_ptr<Expression> second;
 public:
-    using BinaryExpresion::BinaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
+    Pair(std::shared_ptr<Expression> first, std::shared_ptr<Expression> second) : Value(DataType::Pair), first{first}, second{second} {}
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpresion->eval();
-        auto exp2 = rigthExpresion->eval();
+        auto exp1 = first->eval();
+        auto exp2 = second->eval();
         return std::make_shared<Pair>(exp1, exp2);
     }
-    std::shared_ptr<Expresion> getFirst()
+    std::shared_ptr<Expression> getFirst()
     {
-        return leftExpresion;
+        return first;
     }
-    std::shared_ptr<Expresion> getSecond()
+    std::shared_ptr<Expression> getSecond()
     {
-        return rigthExpresion;
+        return second;
     }
 };
 
-class PairFirst : public UnaryExpresion
+class PairFirst : public UnaryExpression
 {
 public:
-    using UnaryExpresion::UnaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
+    using UnaryExpression::UnaryExpression;
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp = expresion->eval();
+        auto exp = expression->eval();
         auto pair = std::dynamic_pointer_cast<Pair>(exp);
         if (pair == nullptr)
         {
@@ -307,13 +406,13 @@ public:
     }
 };
 
-class PairSecond : public UnaryExpresion
+class PairSecond : public UnaryExpression
 {
 public:
-    using UnaryExpresion::UnaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
+    using UnaryExpression::UnaryExpression;
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp = expresion->eval();
+        auto exp = expression->eval();
         auto pair = std::dynamic_pointer_cast<Pair>(exp);
         if (pair == nullptr)
         {
@@ -323,89 +422,28 @@ public:
     }
 };
 
-class Vector : public Expresion
+class Vector : public Value
 {
 private:
-    std::vector<std::shared_ptr<Expresion>> vectorExpresion;
+    std::vector<std::shared_ptr<Expression>> vectorExpression;
 public:
-    Vector(std::vector<std::shared_ptr<Expresion>> _vectorExpresion) : vectorExpresion(_vectorExpresion) {}
-    std::shared_ptr<Expresion> eval() const override
+    Vector(std::vector<std::shared_ptr<Expression>> _vectorExpression) : Value(DataType::Vector), vectorExpression(_vectorExpression) {}
+    std::shared_ptr<Expression> eval() const override
     {
-        std::vector<std::shared_ptr<Expresion>> newVector;
-        for (auto exp : vectorExpresion)
+        std::vector<std::shared_ptr<Expression>> newVector;
+        for (auto exp : vectorExpression)
         {
             auto element = exp->eval();
             newVector.push_back(element);
         }
-        return std::make_shared<Expresion>(newVector);
+        return std::make_shared<Vector>(newVector);
     }
 };
-
-class Matrix : public Expresion
-{
-private:
-    std::vector<Vector> matrixExpresion;
-public:
-    Matrix(std::vector<Vector> _matrixExpresion) : matrixExpresion(_matrixExpresion) {}
-};
-
-class Equation : public BinaryExpresion
-{
-public:
-    using BinaryExpresion::BinaryExpresion;
-    std::shared_ptr<Expresion> eval() const override
-    {
-
-        return std::make_shared<Expresion>(newVector);
-    }
-}
 /*
-class Sin : public BinaryExpresion {
+class Matrix : public Value
+{
 private:
-    std::shared_ptr<Expresion> innerExpresion;
-
+    std::vector<Vector> matrixExpression;
 public:
-    Sin(std::shared_ptr<Expresion> exp) : innerExpresion(exp) {}
-
-    double eval() const override {
-        return std::sin(innerExpresion->eval());
-    }
-};
-
-class Cos : public Expresion {
-private:
-    std::shared_ptr<Expresion> innerExpresion;
-
-public:
-    Cos(std::shared_ptr<Expresion> exp) : innerExpresion(exp) {}
-
-    double eval() const override {
-        return std::cos(innerExpresion->eval());
-    }
-};
-
-
-class Interval: public Expresion {
-private:
-    std::shared_ptr<Expresion> inferiorExpresion;
-    std::shared_ptr<Expresion> superiorExpresion;
-
-public:
-    Interval(std::shared_ptr<Expresion> inf, std::shared_ptr<Expresion> sup) : inferiorExpresion(inf), superiorExpresion(sup) {}
-
-    double eval() const override {
-        return std::cos(innerExpresion->eval());
-    }
-};
-
-class Integral: public Expresion {
-private:
-    std::shared_ptr<Expresion> innerExpresion;
-
-public:
-    Cos(std::shared_ptr<Expresion> exp) : innerExpresion(exp) {}
-
-    double eval() const override {
-        return std::cos(innerExpresion->eval());
-    }
+    Matrix(std::vector<Vector> _matrixExpression) : Value(DataType::Matrix), matrixExpression(_matrixExpression) {}
 };*/
