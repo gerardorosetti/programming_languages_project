@@ -434,16 +434,39 @@ public:
         for (auto exp : vectorExpression)
         {
             auto element = exp->eval();
+            if (element = nullptr)
+            {
+                return nullptr;
+            }
             newVector.push_back(element);
         }
         return std::make_shared<Vector>(newVector);
     }
 };
-/*
+
 class Matrix : public Value
 {
 private:
-    std::vector<Vector> matrixExpression;
+    std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression;
 public:
-    Matrix(std::vector<Vector> _matrixExpression) : Value(DataType::Matrix), matrixExpression(_matrixExpression) {}
-};*/
+    Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression) : Value(DataType::Matrix), matrixExpression(_matrixExpression) {}
+    std::shared_ptr<Expression> eval() const override
+    {
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
+        {
+            std::vector<std::shared_ptr<Expression>> newVector;
+            for (std::shared_ptr<Expression> exp : vec)
+            {
+                auto element = exp->eval();
+                if (element = nullptr)
+                {
+                    return nullptr;
+                }
+                newVector.push_back(element);
+            }
+            newMatrix.push_back(newVector);
+        }
+        return std::make_shared<Matrix>(newMatrix);
+    }
+};
