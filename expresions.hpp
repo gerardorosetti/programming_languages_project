@@ -54,18 +54,34 @@ class Letter : public Value
 {
 protected:
     char letter;
+    double value;
+    bool hasValue;
 public:
-    Letter(char lett) : Value(DataType::Letter), letter{lett} {}
+    Letter(char _letter) : Value(DataType::Letter), letter{_letter}, hasValue{false} {}
 
     std::shared_ptr<Expression> eval() const override
     {
+        if (hasValue)
+        {
+            return std::make_shared<Number>(value);
+        }
         return std::make_shared<Letter>(letter);
     }
 
+    void setValue(double val)
+    {
+        hasValue = true;
+        value = val;
+    }
+    void removeValue()
+    {
+        hasValue = false;
+    }
     double getLetter() const
     {
         return letter;
     }
+
 };
 
 class Number : public Value
@@ -74,7 +90,7 @@ protected:
     double number;
 
 public:
-    Number(double num) : Value(DataType::Number), number{num} {}
+    Number(double _number) : Value(DataType::Number), number{_number} {}
 
     std::shared_ptr<Expression> eval() const override
     {
@@ -373,7 +389,7 @@ private:
     std::shared_ptr<Expression> first;
     std::shared_ptr<Expression> second;
 public:
-    Pair(std::shared_ptr<Expression> first, std::shared_ptr<Expression> second) : Value(DataType::Pair), first{first}, second{second} {}
+    Pair(std::shared_ptr<Expression> _first, std::shared_ptr<Expression> _second) : Value(DataType::Pair), first{_first}, second{_second} {}
     std::shared_ptr<Expression> eval() const override
     {
         auto exp1 = first->eval();
@@ -470,3 +486,129 @@ public:
         return std::make_shared<Matrix>(newMatrix);
     }
 };
+
+class Equation : public BinaryExpression
+{
+
+public:
+    using BinaryExpression::BinaryExpression;
+    std::shared_ptr<Expression> eval() const override
+    {
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
+        /*auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
+        {
+            return std::make_shared<Addition>(exp1, exp2);
+        }
+        auto num1 = std::dynamic_pointer_cast<Number>(exp1);
+        auto num2 = std::dynamic_pointer_cast<Number>(exp2);
+        */if (exp1 == nullptr || exp2 == nullptr)
+        {
+            return nullptr;
+        }
+        return std::make_shared<Equation>(exp1, exp2);
+        //return std::make_shared<Expression>(Pair(num1, num2));
+    }
+};
+class Function : public UnaryExpression
+{
+
+public:
+    using UnaryExpression::UnaryExpression;
+
+    std::shared_ptr<Expression> eval() const override
+    {
+        auto exp = expression->eval();
+        if (exp == nullptr)
+        {
+            return nullptr;
+        }
+        return std::make_shared<Function>(exp);
+    }
+};
+
+class Integral : public Expression
+{
+private:
+    std::shared_ptr<Pair> interval;
+    std::shared_ptr<Function> function;
+public:
+    Integral(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function) : interval(_interval) , function(_function) {}
+
+    std::shared_ptr<Expression> eval() const override
+    {
+        auto inter = interval->eval();
+
+        auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}.eval());
+        auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}.eval());
+        if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
+        {
+            return nullptr;
+        }
+
+        double a = to->getNumber();
+        double b = tf->getNumber();
+        auto f = function->eval();
+        double result = 0.0;
+
+        // Perform integration here
+        // For example, you could use the trapezoidal rule
+        double h = (b - a) / 100.0;
+        for (double x = a; x <= b; x += h)
+        {
+            auto fx = std::dynamic_pointer_cast<Number>(f->eval());
+            if (fx == nullptr)
+            {
+                return nullptr;
+            }
+            result += h * fx->getNumber();
+        }
+
+        return std::make_shared<Number>(result);
+    }
+};
+class ODEInitialValues : public Expression
+{
+private:
+    std::shared_ptr<Function> function;
+    std::shared_ptr<Pair> values;
+public:
+    ODEInitialValues(std::shared_ptr<Function> _function, std::shared_ptr<Pair> _values) : function(_function), values(_values) {}
+    std::shared_ptr<Expression> eval() const override
+    {
+        auto inter = values->eval();
+        auto to = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairFirst>(inter)->eval());
+        auto tf = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairSecond>(inter)->eval());
+        if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
+        {
+            return nullptr;
+        }
+        return nullptr;
+    }
+};
+/*
+class SystemOfEquations : public Expression
+{
+public:
+    std::vector<std::shared_ptr<Equation>> system;
+private:
+    SystemOfEquations(std::vector<std::shared_ptr<Equation>> system) : system(system) {}
+
+    std::shared_ptr<Expression> eval() const override
+    {
+        std::vector<std::shared_ptr<Equation>> newEqSys;
+        for (auto exp : system)
+        {
+            auto element = exp->eval();
+            if (element = nullptr)
+            {
+                return nullptr;
+            }
+            newEqSys.push_back(std::dynamic_pointer_cast<Equation>(element));
+        }
+        return std::make_shared<Vector>(newEqSys);
+        return nullptr;
+    }
+};*/
