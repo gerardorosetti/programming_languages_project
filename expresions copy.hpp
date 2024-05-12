@@ -1,8 +1,6 @@
 #include <cmath>
 #include <memory>
 #include <vector>
-#include <forward_list>
-#include <functional>
 
 enum class DataType
 {
@@ -10,18 +8,15 @@ enum class DataType
     Vector,
     Matrix,
     Number,
-    Variable
+    Letter
 };
 
 class Expression
 {
 public:
-    virtual std::shared_ptr<Expression> eval(std::forward_list<std::pair<char, std::shared_ptr<Expression>>>&) const = 0;
-    //virtual std::shared_ptr<Expression> eval(Environment&) const = 0;
+    virtual std::shared_ptr<Expression> eval() const = 0;
     virtual ~Expression() {}
 };
-
-using Environment = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>;
 
 class Value : public Expression
 {
@@ -55,6 +50,40 @@ public:
     BinaryExpression(std::shared_ptr<Expression> left, std::shared_ptr<Expression> rigth) : leftExpression{left}, rigthExpression{rigth} {};
 };
 
+class Letter : public Value
+{
+protected:
+    char letter;
+    double value;
+    bool hasValue;
+public:
+    Letter(char _letter) : Value(DataType::Letter), letter{_letter}, hasValue{false} {}
+
+    std::shared_ptr<Expression> eval() const override
+    {
+        if (hasValue)
+        {
+            return std::make_shared<Number>(value);
+        }
+        return std::make_shared<Letter>(letter);
+    }
+
+    void setValue(double val)
+    {
+        hasValue = true;
+        value = val;
+    }
+    void removeValue()
+    {
+        hasValue = false;
+    }
+    double getLetter() const
+    {
+        return letter;
+    }
+
+};
+
 class Number : public Value
 {
 protected:
@@ -63,9 +92,8 @@ protected:
 public:
     Number(double _number) : Value(DataType::Number), number{_number} {}
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        //return std::shared_ptr<Expression>();
         return std::make_shared<Number>(number);
     }
 
@@ -75,65 +103,20 @@ public:
     }
 };
 
-class Variable : public Value
-{
-protected:
-    char variable;
-    //double value;
-    //bool hasValue;
-public:
-    Variable(char _variable) : Value(DataType::Variable), variable{_variable}/*, hasValue{false}*/ {}
-
-    std::shared_ptr<Expression> eval(Environment& env) const override
-    {
-        if (!env.empty())
-        {
-            for (auto par : env)
-            {
-                //std::cout << "Letter found: "<< par.first << std::endl;
-                if (par.first == variable)
-                {
-                    auto test = std::dynamic_pointer_cast<Number>(par.second->eval(env));
-                    //std::cout << "The value is: "<< test->getNumber() << std::endl;
-                    return test;
-                }
-            }
-            return nullptr;
-        }
-        return std::make_shared<Variable>(variable);
-    }
-
-    /*void setValue(double val)
-    {
-        hasValue = true;
-        value = val;
-    }
-    void removeValue()
-    {
-        hasValue = false;
-    }*/
-    double getVariable() const
-    {
-        return variable;
-    }
-
-};
-
 // known Expressions
 class Addition : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
 
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
-            //std::cout << "Variable found" << std::endl;
             return std::make_shared<Addition>(exp1, exp2);
         }
 
@@ -141,11 +124,9 @@ public:
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
         {
-            //std::cout << "Error" << std::endl;
             return nullptr;
         }
         double result = num1->getNumber() + num2->getNumber();
-        //std::cout << "Result: " << result << std::endl;
         return std::make_shared<Number>(result);
     }
 };
@@ -155,13 +136,13 @@ class Subtraction : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -182,13 +163,13 @@ class Multiplication : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -209,13 +190,13 @@ class Division : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -236,13 +217,13 @@ class Power : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -263,11 +244,11 @@ class NaturalLogarithm : public UnaryExpression {
 public:
     using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expression->eval(env);
+        auto exp1 = expression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        if(element1->getDataType() == DataType::Variable)
+        if(element1->getDataType() == DataType::Letter)
         {
             return std::make_shared<NaturalLogarithm>(exp1);
         }
@@ -287,13 +268,13 @@ class Logarithm : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -314,11 +295,11 @@ class Sine : public UnaryExpression {
 public:
     using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-       auto exp1 = expression->eval(env);
+       auto exp1 = expression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        if(element1->getDataType() == DataType::Variable)
+        if(element1->getDataType() == DataType::Letter)
         {
             return std::make_shared<Sine>(exp1);
         }
@@ -338,11 +319,11 @@ class Cosine : public UnaryExpression {
 public:
     using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expression->eval(env);
+        auto exp1 = expression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        if(element1->getDataType() == DataType::Variable)
+        if(element1->getDataType() == DataType::Letter)
         {
             return std::make_shared<Cosine>(exp1);
         }
@@ -361,11 +342,11 @@ class Tangent : public UnaryExpression {
 
 public:
     using UnaryExpression::UnaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expression->eval(env);
+        auto exp1 = expression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        if(element1->getDataType() == DataType::Variable)
+        if(element1->getDataType() == DataType::Letter)
         {
             return std::make_shared<Tangent>(exp1);
         }
@@ -383,11 +364,11 @@ public:
 class Cotangent : public UnaryExpression {
 public:
     using UnaryExpression::UnaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = expression->eval(env);
+        auto exp1 = expression->eval();
         auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        if(element1->getDataType() == DataType::Variable)
+        if(element1->getDataType() == DataType::Letter)
         {
             return std::make_shared<Cotangent>(exp1);
         }
@@ -409,10 +390,10 @@ private:
     std::shared_ptr<Expression> second;
 public:
     Pair(std::shared_ptr<Expression> _first, std::shared_ptr<Expression> _second) : Value(DataType::Pair), first{_first}, second{_second} {}
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = first->eval(env);
-        auto exp2 = second->eval(env);
+        auto exp1 = first->eval();
+        auto exp2 = second->eval();
         return std::make_shared<Pair>(exp1, exp2);
     }
     std::shared_ptr<Expression> getFirst()
@@ -429,15 +410,15 @@ class PairFirst : public UnaryExpression
 {
 public:
     using UnaryExpression::UnaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp = expression->eval(env);
+        auto exp = expression->eval();
         auto pair = std::dynamic_pointer_cast<Pair>(exp);
         if (pair == nullptr)
         {
             return nullptr;
         }
-        return pair->getFirst()->eval(env);
+        return pair->getFirst()->eval();
     }
 };
 
@@ -445,15 +426,15 @@ class PairSecond : public UnaryExpression
 {
 public:
     using UnaryExpression::UnaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp = expression->eval(env);
+        auto exp = expression->eval();
         auto pair = std::dynamic_pointer_cast<Pair>(exp);
         if (pair == nullptr)
         {
             return nullptr;
         }
-        return pair->getSecond()->eval(env);
+        return pair->getSecond()->eval();
     }
 };
 
@@ -463,12 +444,12 @@ private:
     std::vector<std::shared_ptr<Expression>> vectorExpression;
 public:
     Vector(std::vector<std::shared_ptr<Expression>> _vectorExpression) : Value(DataType::Vector), vectorExpression(_vectorExpression) {}
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
         std::vector<std::shared_ptr<Expression>> newVector;
         for (auto exp : vectorExpression)
         {
-            auto element = exp->eval(env);
+            auto element = exp->eval();
             if (element = nullptr)
             {
                 return nullptr;
@@ -485,7 +466,7 @@ private:
     std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression;
 public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression) : Value(DataType::Matrix), matrixExpression(_matrixExpression) {}
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
         std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
         for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
@@ -493,7 +474,7 @@ public:
             std::vector<std::shared_ptr<Expression>> newVector;
             for (std::shared_ptr<Expression> exp : vec)
             {
-                auto element = exp->eval(env);
+                auto element = exp->eval();
                 if (element = nullptr)
                 {
                     return nullptr;
@@ -511,13 +492,13 @@ class Equation : public BinaryExpression
 
 public:
     using BinaryExpression::BinaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
+        auto exp1 = leftExpression->eval();
+        auto exp2 = rigthExpression->eval();
         /*auto element1 = std::dynamic_pointer_cast<Value>(exp1);
         auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+        if (element1->getDataType() == DataType::Letter || element2->getDataType() == DataType::Letter)
         {
             return std::make_shared<Addition>(exp1, exp2);
         }
@@ -537,15 +518,14 @@ class Function : public UnaryExpression
 public:
     using UnaryExpression::UnaryExpression;
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto exp = expression->eval(env);
+        auto exp = expression->eval();
         if (exp == nullptr)
         {
             return nullptr;
         }
-        return exp;
-        //return std::make_shared<Function>(exp);
+        return std::make_shared<Function>(exp);
     }
 };
 
@@ -554,70 +534,15 @@ class Integral : public Expression
 private:
     std::shared_ptr<Pair> interval;
     std::shared_ptr<Function> function;
-    std::function<std::shared_ptr<Number>(double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)> simpson = [] (double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)
-    {
-        double s = 0.0;
-        double ss = 0.0;
-        int ls = (n / 2 * 2 == n) ? 0 : 3;
-        double h = (b - a) / n;
-
-        if (ls == 3)
-        {
-            for (size_t i = 0; i <= 3; ++i)
-            {
-                double x = a + h * i;
-                double w = (i == 0 || i == 3) ? 1 : 3;
-                env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
-                std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
-                if (funcResult == nullptr)
-                {
-                    return funcResult;
-                }
-                ss = ss + w * funcResult->getNumber();
-            }
-
-            ss = ss * h * 3 / 8;
-
-            if (n == 3)
-            {
-                return std::make_shared<Number>(ss);
-            }
-        }
-
-        for (size_t i = 0; i <= n - ls; ++i)
-        {
-            double x = a + h * (i + ls);
-            double w = 2;
-
-            if (int(i / 2) * 2 + 1 == i)
-            {
-                w = 4;
-            }
-
-            if (i == 0 || i == n - ls)
-            {
-                w = 1;
-            }
-            env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
-            std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
-            if (funcResult == nullptr)
-            {
-                return funcResult;
-            }
-            s = s + w * funcResult->getNumber();
-        }
-
-        return std::make_shared<Number>(ss + s * h / 3);
-    };
 public:
     Integral(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function) : interval(_interval) , function(_function) {}
 
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto inter = interval->eval(env);
+        auto inter = interval->eval();
 
-        auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}.eval(env));
-        auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}.eval(env));
+        auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}.eval());
+        auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}.eval());
         if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
         {
             return nullptr;
@@ -625,13 +550,23 @@ public:
 
         double a = to->getNumber();
         double b = tf->getNumber();
-        std::shared_ptr<Number> num = simpson(a, b, 100, function, env);
-        if (num == nullptr)
+        auto f = function->eval();
+        double result = 0.0;
+
+        // Perform integration here
+        // For example, you could use the trapezoidal rule
+        double h = (b - a) / 100.0;
+        for (double x = a; x <= b; x += h)
         {
-            return nullptr;
+            auto fx = std::dynamic_pointer_cast<Number>(f->eval());
+            if (fx == nullptr)
+            {
+                return nullptr;
+            }
+            result += h * fx->getNumber();
         }
 
-        return num;
+        return std::make_shared<Number>(result);
     }
 };
 class ODEInitialValues : public Expression
@@ -641,11 +576,11 @@ private:
     std::shared_ptr<Pair> values;
 public:
     ODEInitialValues(std::shared_ptr<Function> _function, std::shared_ptr<Pair> _values) : function(_function), values(_values) {}
-    std::shared_ptr<Expression> eval(Environment& env) const override
+    std::shared_ptr<Expression> eval() const override
     {
-        auto inter = values->eval(env);
-        auto to = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairFirst>(inter)->eval(env));
-        auto tf = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairSecond>(inter)->eval(env));
+        auto inter = values->eval();
+        auto to = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairFirst>(inter)->eval());
+        auto tf = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairSecond>(inter)->eval());
         if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
         {
             return nullptr;
@@ -661,12 +596,12 @@ public:
 private:
     SystemOfEquations(std::vector<std::shared_ptr<Equation>> system) : system(system) {}
 
-    std::shared_ptr<Expression> eval(std::forward_list<std::shared_ptr<Expression>>) const override
+    std::shared_ptr<Expression> eval() const override
     {
         std::vector<std::shared_ptr<Equation>> newEqSys;
         for (auto exp : system)
         {
-            auto element = exp->eval(std::forward_list<std::shared_ptr<Expression>>);
+            auto element = exp->eval();
             if (element = nullptr)
             {
                 return nullptr;

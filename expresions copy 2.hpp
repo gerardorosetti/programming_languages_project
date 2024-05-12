@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 #include <forward_list>
-#include <functional>
 
 enum class DataType
 {
@@ -65,7 +64,6 @@ public:
 
     std::shared_ptr<Expression> eval(Environment& env) const override
     {
-        //return std::shared_ptr<Expression>();
         return std::make_shared<Number>(number);
     }
 
@@ -88,14 +86,11 @@ public:
     {
         if (!env.empty())
         {
-            for (auto par : env)
+            for (auto pair : env)
             {
-                //std::cout << "Letter found: "<< par.first << std::endl;
-                if (par.first == variable)
+                if (pair.first == variable)
                 {
-                    auto test = std::dynamic_pointer_cast<Number>(par.second->eval(env));
-                    //std::cout << "The value is: "<< test->getNumber() << std::endl;
-                    return test;
+                    return std::make_shared<Number>(pair.second);
                 }
             }
             return nullptr;
@@ -133,7 +128,6 @@ public:
 
         if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
         {
-            //std::cout << "Variable found" << std::endl;
             return std::make_shared<Addition>(exp1, exp2);
         }
 
@@ -141,11 +135,9 @@ public:
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
         {
-            //std::cout << "Error" << std::endl;
             return nullptr;
         }
         double result = num1->getNumber() + num2->getNumber();
-        //std::cout << "Result: " << result << std::endl;
         return std::make_shared<Number>(result);
     }
 };
@@ -544,8 +536,7 @@ public:
         {
             return nullptr;
         }
-        return exp;
-        //return std::make_shared<Function>(exp);
+        return std::make_shared<Function>(exp);
     }
 };
 
@@ -554,61 +545,6 @@ class Integral : public Expression
 private:
     std::shared_ptr<Pair> interval;
     std::shared_ptr<Function> function;
-    std::function<std::shared_ptr<Number>(double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)> simpson = [] (double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)
-    {
-        double s = 0.0;
-        double ss = 0.0;
-        int ls = (n / 2 * 2 == n) ? 0 : 3;
-        double h = (b - a) / n;
-
-        if (ls == 3)
-        {
-            for (size_t i = 0; i <= 3; ++i)
-            {
-                double x = a + h * i;
-                double w = (i == 0 || i == 3) ? 1 : 3;
-                env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
-                std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
-                if (funcResult == nullptr)
-                {
-                    return funcResult;
-                }
-                ss = ss + w * funcResult->getNumber();
-            }
-
-            ss = ss * h * 3 / 8;
-
-            if (n == 3)
-            {
-                return std::make_shared<Number>(ss);
-            }
-        }
-
-        for (size_t i = 0; i <= n - ls; ++i)
-        {
-            double x = a + h * (i + ls);
-            double w = 2;
-
-            if (int(i / 2) * 2 + 1 == i)
-            {
-                w = 4;
-            }
-
-            if (i == 0 || i == n - ls)
-            {
-                w = 1;
-            }
-            env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
-            std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
-            if (funcResult == nullptr)
-            {
-                return funcResult;
-            }
-            s = s + w * funcResult->getNumber();
-        }
-
-        return std::make_shared<Number>(ss + s * h / 3);
-    };
 public:
     Integral(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function) : interval(_interval) , function(_function) {}
 
@@ -625,13 +561,26 @@ public:
 
         double a = to->getNumber();
         double b = tf->getNumber();
-        std::shared_ptr<Number> num = simpson(a, b, 100, function, env);
-        if (num == nullptr)
+        auto f = function->eval(env);
+        double result = 0.0;
+
+        // Perform integration here
+        // For example, you could use the trapezoidal rule
+        double h = (b - a) / 100.0;
+        for (double x = a; x <= b; x += h)
         {
-            return nullptr;
+            //std::shared_ptr<Expression> num = std::make_shared<Number>(x);
+            //std::pair<char, std::shared_ptr<Expression>> newVal = std::make_pair('x', num);
+            env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
+            auto fx = std::dynamic_pointer_cast<Number>(f->eval(env));
+            if (fx == nullptr)
+            {
+                return nullptr;
+            }
+            result += h * fx->getNumber();
         }
 
-        return num;
+        return std::make_shared<Number>(result);
     }
 };
 class ODEInitialValues : public Expression
