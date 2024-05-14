@@ -189,6 +189,8 @@ protected:
 public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::vector<std::vector<std::shared_ptr<Expression>>> getMatrixExpression() const;
+    void displayMatrix() const;
 };
 
 class Equation : public BinaryExpression
@@ -205,7 +207,7 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
-class Integral : public Expression // Resolution by simpson method
+class Integral : public Expression // Resolution by Simpson Method
 {
 private:
     std::shared_ptr<Pair> interval;
@@ -226,7 +228,7 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
-class Interpolate : public Vector
+class Interpolate : public Vector // Resolution by Lagrange
 {
 private:
     std::shared_ptr<Number> numInter;
@@ -234,6 +236,7 @@ public:
     Interpolate(std::vector<std::shared_ptr<Expression>> _vectorExpression, std::shared_ptr<Number> _numInter);
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
+
 /*
 class SystemOfEquations : public Expression
 {

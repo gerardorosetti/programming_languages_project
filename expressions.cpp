@@ -51,23 +51,47 @@ char Variable::getVariable() const
 std::shared_ptr<Expression> Addition::eval(Environment& env) const
 {
     auto exp1 = leftExpression->eval(env);
-        auto exp2 = rigthExpression->eval(env);
-        auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
-        {
-            return std::make_shared<Addition>(exp1, exp2);
-        }
-
-        auto num1 = std::dynamic_pointer_cast<Number>(exp1);
-        auto num2 = std::dynamic_pointer_cast<Number>(exp2);
-        if (num1 == nullptr || num2 == nullptr)
+    auto exp2 = rigthExpression->eval(env);
+    auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+    auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+    if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+    {
+        return std::make_shared<Addition>(exp1, exp2);
+    }
+    else if (element1->getDataType() == DataType::Matrix && element2->getDataType() == DataType::Matrix)
+    {
+        auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
+        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
+        if (matrix1.size() != matrix2.size())
         {
             return nullptr;
         }
-        double result = num1->getNumber() + num2->getNumber();
-        return std::make_shared<Number>(result);
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (size_t i = 0; i < matrix1.size(); ++i)
+        {
+            if (matrix1[i].size() != matrix2[i].size())
+            {
+                return nullptr;
+            }
+            std::vector<std::shared_ptr<Expression>> newVec;
+            for (size_t j = 0; j < matrix1[i].size(); ++j)
+            {
+                auto add = Addition(matrix1[i][j], matrix2[i][j]);
+                std::cout << "test" << std::endl;
+                newVec.push_back(std::make_shared<Addition>(matrix1[i][j], matrix2[i][j]));
+            }
+            newMatrix.push_back(newVec);
+        }
+        return std::make_shared<Matrix>(newMatrix)->eval(env);
+    }
+    auto num1 = std::dynamic_pointer_cast<Number>(exp1);
+    auto num2 = std::dynamic_pointer_cast<Number>(exp2);
+    if (num1 == nullptr || num2 == nullptr)
+    {
+        return nullptr;
+    }
+    double result = num1->getNumber() + num2->getNumber();
+    return std::make_shared<Number>(result);
 };
 
 //Subtraction
@@ -349,7 +373,28 @@ std::shared_ptr<Expression> Matrix::eval(Environment& env) const
     }
     return std::make_shared<Matrix>(newMatrix);
 }
-
+std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpression() const
+{
+    return matrixExpression;
+}
+void Matrix::displayMatrix() const
+{
+    std::cout << "Matrix =\n\n";
+    for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
+    {
+        for (std::shared_ptr<Expression> exp : vec)
+        {
+            auto num = std::dynamic_pointer_cast<Number>(exp);
+            if (num == nullptr)
+            {
+                std::cout << "cannot display data type incorrect" << std::endl;
+                return;
+            }
+            std::cout << " " << num->getNumber();
+        }
+        std::cout << std::endl;
+    }
+}
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const
 {
@@ -457,9 +502,7 @@ std::shared_ptr<Expression> ODEInitialValues::eval(Environment& env) const
 }
 
 // Interpolate
-
 Interpolate::Interpolate(std::vector<std::shared_ptr<Expression>> _vectorExpression, std::shared_ptr<Number> _numInter) : Vector(_vectorExpression), numInter(_numInter) {}
-
 std::shared_ptr<Expression> Interpolate::eval(Environment& env) const
 {
     std::vector<double> x;
