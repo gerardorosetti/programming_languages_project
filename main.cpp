@@ -1,5 +1,5 @@
 #include <iostream>
-#include "expresions.hpp"
+#include "expressions.hpp"
 
 int main()
 {
@@ -51,7 +51,21 @@ int main()
 
     std::cout << "El resultado de la integral es: " << std::dynamic_pointer_cast<Number>(integral->eval(emptyEnv))->getNumber() << std::endl;
 
+    std::vector<std::shared_ptr<Expression>> vectorExpression =
+    {
+        std::make_shared<Pair>(std::make_shared<Number>(0), std::make_shared<Number>(1.792)),
+        std::make_shared<Pair>(std::make_shared<Number>(10), std::make_shared<Number>(1.308)),
+        std::make_shared<Pair>(std::make_shared<Number>(30), std::make_shared<Number>(0.801)),
+        std::make_shared<Pair>(std::make_shared<Number>(50), std::make_shared<Number>(0.549)),
+        std::make_shared<Pair>(std::make_shared<Number>(70), std::make_shared<Number>(0.406)),
+        std::make_shared<Pair>(std::make_shared<Number>(90), std::make_shared<Number>(0.317)),
+        std::make_shared<Pair>(std::make_shared<Number>(100), std::make_shared<Number>(0.284)),
+    };
+    //std::shared_ptr<Vector> vector = std::make_shared<Vector>(vectorExpression);
 
+    std::shared_ptr<Expression> interpolate = std::make_shared<Interpolate>(vectorExpression, std::make_shared<Number>(15.0));
+
+    std::cout << "El resultado de la interpolacion es: " << std::dynamic_pointer_cast<Number>(interpolate->eval(emptyEnv))->getNumber() << std::endl;
 
     return 0;
 }
