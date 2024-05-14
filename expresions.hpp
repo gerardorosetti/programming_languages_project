@@ -17,7 +17,6 @@ class Expression
 {
 public:
     virtual std::shared_ptr<Expression> eval(std::forward_list<std::pair<char, std::shared_ptr<Expression>>>&) const = 0;
-    //virtual std::shared_ptr<Expression> eval(Environment&) const = 0;
     virtual ~Expression() {}
 };
 
@@ -65,7 +64,6 @@ public:
 
     std::shared_ptr<Expression> eval(Environment& env) const override
     {
-        //return std::shared_ptr<Expression>();
         return std::make_shared<Number>(number);
     }
 
@@ -79,10 +77,8 @@ class Variable : public Value
 {
 protected:
     char variable;
-    //double value;
-    //bool hasValue;
 public:
-    Variable(char _variable) : Value(DataType::Variable), variable{_variable}/*, hasValue{false}*/ {}
+    Variable(char _variable) : Value(DataType::Variable), variable{_variable} {}
 
     std::shared_ptr<Expression> eval(Environment& env) const override
     {
@@ -90,11 +86,9 @@ public:
         {
             for (auto par : env)
             {
-                //std::cout << "Letter found: "<< par.first << std::endl;
                 if (par.first == variable)
                 {
                     auto test = std::dynamic_pointer_cast<Number>(par.second->eval(env));
-                    //std::cout << "The value is: "<< test->getNumber() << std::endl;
                     return test;
                 }
             }
@@ -103,20 +97,10 @@ public:
         return std::make_shared<Variable>(variable);
     }
 
-    /*void setValue(double val)
-    {
-        hasValue = true;
-        value = val;
-    }
-    void removeValue()
-    {
-        hasValue = false;
-    }*/
     double getVariable() const
     {
         return variable;
     }
-
 };
 
 // known Expressions
@@ -133,7 +117,6 @@ public:
 
         if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
         {
-            //std::cout << "Variable found" << std::endl;
             return std::make_shared<Addition>(exp1, exp2);
         }
 
@@ -141,11 +124,9 @@ public:
         auto num2 = std::dynamic_pointer_cast<Number>(exp2);
         if (num1 == nullptr || num2 == nullptr)
         {
-            //std::cout << "Error" << std::endl;
             return nullptr;
         }
         double result = num1->getNumber() + num2->getNumber();
-        //std::cout << "Result: " << result << std::endl;
         return std::make_shared<Number>(result);
     }
 };
@@ -515,20 +496,11 @@ public:
     {
         auto exp1 = leftExpression->eval(env);
         auto exp2 = rigthExpression->eval(env);
-        /*auto element1 = std::dynamic_pointer_cast<Value>(exp1);
-        auto element2 = std::dynamic_pointer_cast<Value>(exp2);
-        if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
-        {
-            return std::make_shared<Addition>(exp1, exp2);
-        }
-        auto num1 = std::dynamic_pointer_cast<Number>(exp1);
-        auto num2 = std::dynamic_pointer_cast<Number>(exp2);
-        */if (exp1 == nullptr || exp2 == nullptr)
+        if (exp1 == nullptr || exp2 == nullptr)
         {
             return nullptr;
         }
         return std::make_shared<Equation>(exp1, exp2);
-        //return std::make_shared<Expression>(Pair(num1, num2));
     }
 };
 class Function : public UnaryExpression
@@ -545,16 +517,16 @@ public:
             return nullptr;
         }
         return exp;
-        //return std::make_shared<Function>(exp);
     }
 };
 
-class Integral : public Expression
+class Integral : public Expression // Resolution by simpson method
 {
 private:
     std::shared_ptr<Pair> interval;
     std::shared_ptr<Function> function;
-    std::function<std::shared_ptr<Number>(double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)> simpson = [] (double a, double b, int n, std::shared_ptr<Expression> function, Environment& env)
+    std::shared_ptr<Variable> variable;
+    std::shared_ptr<Number> simpsonMethod(double a, double b, int n, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const
     {
         double s = 0.0;
         double ss = 0.0;
@@ -567,7 +539,7 @@ private:
             {
                 double x = a + h * i;
                 double w = (i == 0 || i == 3) ? 1 : 3;
-                env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
+                env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x)));
                 std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
                 if (funcResult == nullptr)
                 {
@@ -598,7 +570,7 @@ private:
             {
                 w = 1;
             }
-            env.push_front(std::make_pair('x', std::make_shared<Number>(x)));
+            env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x)));
             std::shared_ptr<Number> funcResult = std::dynamic_pointer_cast<Number>(function->eval(env));
             if (funcResult == nullptr)
             {
@@ -608,9 +580,9 @@ private:
         }
 
         return std::make_shared<Number>(ss + s * h / 3);
-    };
+    }
 public:
-    Integral(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function) : interval(_interval) , function(_function) {}
+    Integral(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function, std::shared_ptr<Variable> _variable) : interval(_interval), function(_function), variable(_variable) {}
 
     std::shared_ptr<Expression> eval(Environment& env) const override
     {
@@ -625,7 +597,7 @@ public:
 
         double a = to->getNumber();
         double b = tf->getNumber();
-        std::shared_ptr<Number> num = simpson(a, b, 100, function, env);
+        std::shared_ptr<Number> num = simpsonMethod(a, b, 100, function, env, variable);
         if (num == nullptr)
         {
             return nullptr;

@@ -47,7 +47,7 @@ int main()
 
     std::shared_ptr<Expression> num5 = std::make_shared<Function>(sum3);
 
-    std::shared_ptr<Expression> integral = std::make_shared<Integral>(std::make_shared<Pair>(num3,num4), std::make_shared<Function>(num5));
+    std::shared_ptr<Expression> integral = std::make_shared<Integral>(std::make_shared<Pair>(num3,num4), std::make_shared<Function>(num5), std::dynamic_pointer_cast<Variable>(letter));
 
     std::cout << "El resultado de la integral es: " << std::dynamic_pointer_cast<Number>(integral->eval(emptyEnv))->getNumber() << std::endl;
 
