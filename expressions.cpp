@@ -135,7 +135,31 @@ std::shared_ptr<Expression> Subtraction::eval(Environment& env) const
     auto element2 = std::dynamic_pointer_cast<Value>(exp2);
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
-        return std::make_shared<Addition>(exp1, exp2);
+        return std::make_shared<Subtraction>(exp1, exp2);
+    }
+    else if (element1->getDataType() == DataType::Matrix && element2->getDataType() == DataType::Matrix)
+    {
+        auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
+        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
+        if (matrix1.size() != matrix2.size())
+        {
+            return nullptr;
+        }
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (size_t i = 0; i < matrix1.size(); ++i)
+        {
+            if (matrix1[i].size() != matrix2[i].size())
+            {
+                return nullptr;
+            }
+            std::vector<std::shared_ptr<Expression>> newVec;
+            for (size_t j = 0; j < matrix1[i].size(); ++j)
+            {
+                newVec.push_back(std::make_shared<Subtraction>(matrix1[i][j], matrix2[i][j]));
+            }
+            newMatrix.push_back(newVec);
+        }
+        return std::make_shared<Matrix>(newMatrix)->eval(env);
     }
 
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
@@ -157,8 +181,42 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
     auto element2 = std::dynamic_pointer_cast<Value>(exp2);
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
-        return std::make_shared<Addition>(exp1, exp2);
+        return std::make_shared<Multiplication>(exp1, exp2);
     }
+    else if (element1->getDataType() == DataType::Matrix && element2->getDataType() == DataType::Matrix)
+    {
+        auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
+        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
+        /*if (matrix1.size() != matrix2.size())
+        {
+            return nullptr;
+        }*/
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (size_t i = 0; i < matrix1.size(); ++i)
+        {
+            if (matrix1.size() != matrix2[i].size())
+            {
+                return nullptr;
+            }
+            std::vector<std::shared_ptr<Expression>> newVec;
+            for (size_t j = 0; j < matrix2[i].size(); ++j)
+            {
+                //double acc = 0.0;
+                //std::shared_ptr<Number> acc = std::make_shared<Number>(0.0);
+                std::shared_ptr<Expression> acc = std::make_shared<Number>(0.0);
+                for (size_t k1 = 0, k2 = 0; k1 < matrix2[i].size(); ++k1, ++k2)
+                {
+                    //acc = std::dynamic_pointer_cast<Number>(std::make_shared<Addition>(acc, std::make_shared<Multiplication>(matrix1[i][k1], matrix2[k2][j]))->eval(env));
+                    acc = std::make_shared<Addition>(acc, std::make_shared<Multiplication>(matrix1[i][k1], matrix2[k2][j]));
+                    //acc += std::dynamic_pointer_cast<Number>(std::make_shared<Addition>(std::make_shared<Number>(acc), ma))->getValue();
+                }
+                newVec.push_back(acc);
+            }
+            newMatrix.push_back(newVec);
+        }
+        return std::make_shared<Matrix>(newMatrix)->eval(env);
+    }
+
 
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);
@@ -179,7 +237,7 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     auto element2 = std::dynamic_pointer_cast<Value>(exp2);
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
-        return std::make_shared<Addition>(exp1, exp2);
+        return std::make_shared<Division>(exp1, exp2);
     }
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);

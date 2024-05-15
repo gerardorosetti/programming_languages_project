@@ -86,5 +86,13 @@ int main()
 
     Display{matrix};
 
+    std::shared_ptr<Expression> matrix2 = std::dynamic_pointer_cast<Matrix>(std::make_shared<Subtraction>(m1, m2)->eval(emptyEnv));
+
+    Display{matrix2};
+
+    std::shared_ptr<Expression> matrix3 = std::dynamic_pointer_cast<Matrix>(std::make_shared<Multiplication>(m1, m2)->eval(emptyEnv));
+
+    Display{matrix3};
+
     return 0;
 }
