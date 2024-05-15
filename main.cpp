@@ -69,14 +69,22 @@ int main()
     std::vector<std::shared_ptr<Expression>> vec1 = {std::make_shared<Number>(2), std::make_shared<Number>(3)};
     std::vector<std::shared_ptr<Expression>> vec2 = {std::make_shared<Number>(4), std::make_shared<Number>(5)};
     std::vector<std::vector<std::shared_ptr<Expression>>> mat1 = {vec1, vec2};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(mat1);
+
+    Display{m1};
 
     std::vector<std::shared_ptr<Expression>> vec3 = {std::make_shared<Number>(1), std::make_shared<Number>(2)};
     std::vector<std::shared_ptr<Expression>> vec4 = {std::make_shared<Number>(1), std::make_shared<Number>(2)};
     std::vector<std::vector<std::shared_ptr<Expression>>> mat2 = {vec3, vec4};
+    std::shared_ptr<Expression> m2 = std::make_shared<Matrix>(mat2);
 
-    std::shared_ptr<Matrix> matrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<Addition>(std::make_shared<Matrix>(mat1), std::make_shared<Matrix>(mat2))->eval(emptyEnv));//std::make_shared<Matrix>(mat);
+    Display{m2};
 
-    //matrix->displayMatrix();
+    //std::shared_ptr<Expression> matrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<Addition>(std::make_shared<Matrix>(mat1), std::make_shared<Matrix>(mat2))->eval(emptyEnv));
+
+    std::shared_ptr<Expression> matrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<Addition>(m1, m2)->eval(emptyEnv));
+
+    Display{matrix};
 
     return 0;
 }

@@ -47,7 +47,39 @@ char Variable::getVariable() const
 {
     return variable;
 }
-//Addition
+
+// Display
+Display::Display(std::shared_ptr<Expression> _exp)
+{
+    auto value = std::dynamic_pointer_cast<Value>(_exp);
+    if (value == nullptr)
+    {
+        std::cout << "COULD NOT DISPLAY A NON VALUE EXPRESSION" << std::endl;
+        return;
+    }
+    if (value->getDataType() == DataType::Matrix)
+    {
+        auto matrixExpression = std::dynamic_pointer_cast<Matrix>(_exp)->getMatrixExpression();
+        std::cout << "Matrix =\n\n";
+        for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
+        {
+            for (std::shared_ptr<Expression> exp : vec)
+            {
+                auto num = std::dynamic_pointer_cast<Number>(exp);
+                if (num == nullptr)
+                {
+                    std::cout << "cannot display data type incorrect" << std::endl;
+                    return;
+                }
+                std::cout << " " << num->getNumber();
+            }
+            std::cout << std::endl;
+        }
+    }
+}
+
+
+// Addition
 std::shared_ptr<Expression> Addition::eval(Environment& env) const
 {
     auto exp1 = leftExpression->eval(env);
@@ -76,8 +108,8 @@ std::shared_ptr<Expression> Addition::eval(Environment& env) const
             std::vector<std::shared_ptr<Expression>> newVec;
             for (size_t j = 0; j < matrix1[i].size(); ++j)
             {
-                auto add = Addition(matrix1[i][j], matrix2[i][j]);
-                std::cout << "test" << std::endl;
+                //auto add = Addition(matrix1[i][j], matrix2[i][j]);
+                //std::cout << std::dynamic_pointer_cast<Number>(matrix1[i][j]->eval(env))->getNumber() << " - " << std::dynamic_pointer_cast<Number>(matrix2[i][j]->eval(env))->getNumber() << std::endl;
                 newVec.push_back(std::make_shared<Addition>(matrix1[i][j], matrix2[i][j]));
             }
             newMatrix.push_back(newVec);
@@ -363,11 +395,16 @@ std::shared_ptr<Expression> Matrix::eval(Environment& env) const
         for (std::shared_ptr<Expression> exp : vec)
         {
             auto element = exp->eval(env);
-            if (element = nullptr)
+            auto num = std::dynamic_pointer_cast<Number>(element);
+            /*if (element = nullptr)
+            {
+                return nullptr;
+            }*/
+            if (num == nullptr)
             {
                 return nullptr;
             }
-            newVector.push_back(element);
+            newVector.push_back(num);
         }
         newMatrix.push_back(newVector);
     }
@@ -377,7 +414,7 @@ std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpressio
 {
     return matrixExpression;
 }
-void Matrix::displayMatrix() const
+/*void Matrix::displayMatrix() const
 {
     std::cout << "Matrix =\n\n";
     for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
@@ -394,7 +431,8 @@ void Matrix::displayMatrix() const
         }
         std::cout << std::endl;
     }
-}
+}*/
+
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const
 {

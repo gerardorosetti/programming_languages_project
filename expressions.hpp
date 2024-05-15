@@ -11,6 +11,7 @@ enum class DataType
     Matrix,
     Number,
     Variable
+    //Default
 };
 
 class Expression
@@ -28,6 +29,7 @@ protected:
     DataType dataType;
 public:
     Value(DataType _dataType);
+    //Value();
     DataType getDataType() const;
 };
 
@@ -66,6 +68,15 @@ public:
     Variable(char _variable);
     std::shared_ptr<Expression> eval(Environment& env) const override;
     char getVariable() const;
+};
+
+class Display/* : Expression*/
+{
+/*private:
+    std::shared_ptr<Expression> exp;*/
+public:
+    Display(std::shared_ptr<Expression> _exp);
+    //std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
 // known Expressions
@@ -190,7 +201,7 @@ public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::vector<std::vector<std::shared_ptr<Expression>>> getMatrixExpression() const;
-    void displayMatrix() const;
+    //void displayMatrix() const;
 };
 
 class Equation : public BinaryExpression
