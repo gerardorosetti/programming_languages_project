@@ -1,5 +1,6 @@
 #include <iostream>
 #include "expressions.hpp"
+#include "statements.hpp"
 
 int main()
 {
@@ -71,28 +72,38 @@ int main()
     std::vector<std::vector<std::shared_ptr<Expression>>> mat1 = {vec1, vec2};
     std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(mat1);
 
-    Display{m1};
+    std::shared_ptr<Statement> display_m1 = std::make_shared<Display>(m1);
+    display_m1->execute();
+    //Display{m1};
 
     std::vector<std::shared_ptr<Expression>> vec3 = {std::make_shared<Number>(1), std::make_shared<Number>(2)};
     std::vector<std::shared_ptr<Expression>> vec4 = {std::make_shared<Number>(1), std::make_shared<Number>(2)};
     std::vector<std::vector<std::shared_ptr<Expression>>> mat2 = {vec3, vec4};
     std::shared_ptr<Expression> m2 = std::make_shared<Matrix>(mat2);
 
-    Display{m2};
+    std::shared_ptr<Statement> display_m2 = std::make_shared<Display>(m2);
+    display_m2->execute();
+    //Display{m2};
 
     //std::shared_ptr<Expression> matrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<Addition>(std::make_shared<Matrix>(mat1), std::make_shared<Matrix>(mat2))->eval(emptyEnv));
 
     std::shared_ptr<Expression> matrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<Addition>(m1, m2)->eval(emptyEnv));
 
-    Display{matrix};
+    std::shared_ptr<Statement> display_matrix = std::make_shared<Display>(matrix);
+    display_matrix->execute();
+    //Display{matrix};
 
     std::shared_ptr<Expression> matrix2 = std::dynamic_pointer_cast<Matrix>(std::make_shared<Subtraction>(m1, m2)->eval(emptyEnv));
 
-    Display{matrix2};
+    std::shared_ptr<Statement> display_matrix2 = std::make_shared<Display>(matrix2);
+    display_matrix2->execute();
+    //Display{matrix2};
 
     std::shared_ptr<Expression> matrix3 = std::dynamic_pointer_cast<Matrix>(std::make_shared<Multiplication>(m1, m2)->eval(emptyEnv));
 
-    Display{matrix3};
+    std::shared_ptr<Statement> display_matrix3 = std::make_shared<Display>(matrix3);
+    display_matrix3->execute();
+    //Display{matrix3};
 
     return 0;
 }

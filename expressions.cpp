@@ -1,4 +1,3 @@
-#include <iostream>
 #include "expressions.hpp"
 
 // Value
@@ -47,37 +46,6 @@ char Variable::getVariable() const
 {
     return variable;
 }
-
-// Display
-Display::Display(std::shared_ptr<Expression> _exp)
-{
-    auto value = std::dynamic_pointer_cast<Value>(_exp);
-    if (value == nullptr)
-    {
-        std::cout << "COULD NOT DISPLAY A NON VALUE EXPRESSION" << std::endl;
-        return;
-    }
-    if (value->getDataType() == DataType::Matrix)
-    {
-        auto matrixExpression = std::dynamic_pointer_cast<Matrix>(_exp)->getMatrixExpression();
-        std::cout << "Matrix =\n\n";
-        for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
-        {
-            for (std::shared_ptr<Expression> exp : vec)
-            {
-                auto num = std::dynamic_pointer_cast<Number>(exp);
-                if (num == nullptr)
-                {
-                    std::cout << "cannot display data type incorrect" << std::endl;
-                    return;
-                }
-                std::cout << " " << num->getNumber();
-            }
-            std::cout << std::endl;
-        }
-    }
-}
-
 
 // Addition
 std::shared_ptr<Expression> Addition::eval(Environment& env) const
@@ -472,24 +440,6 @@ std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpressio
 {
     return matrixExpression;
 }
-/*void Matrix::displayMatrix() const
-{
-    std::cout << "Matrix =\n\n";
-    for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
-    {
-        for (std::shared_ptr<Expression> exp : vec)
-        {
-            auto num = std::dynamic_pointer_cast<Number>(exp);
-            if (num == nullptr)
-            {
-                std::cout << "cannot display data type incorrect" << std::endl;
-                return;
-            }
-            std::cout << " " << num->getNumber();
-        }
-        std::cout << std::endl;
-    }
-}*/
 
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const

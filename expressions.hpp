@@ -1,3 +1,6 @@
+#pragma once 
+
+#include <iostream>
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -11,7 +14,6 @@ enum class DataType
     Matrix,
     Number,
     Variable
-    //Default
 };
 
 class Expression
@@ -70,16 +72,6 @@ public:
     char getVariable() const;
 };
 
-class Display/* : Expression*/
-{
-/*private:
-    std::shared_ptr<Expression> exp;*/
-public:
-    Display(std::shared_ptr<Expression> _exp);
-    //std::shared_ptr<Expression> eval(Environment& env) const override;
-};
-
-// known Expressions
 class Addition : public BinaryExpression {
 public:
     using BinaryExpression::BinaryExpression;
@@ -157,7 +149,6 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
-// Expressions for our language
 class Pair : public Value
 {
 private:
@@ -201,7 +192,6 @@ public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::vector<std::vector<std::shared_ptr<Expression>>> getMatrixExpression() const;
-    //void displayMatrix() const;
 };
 
 class Equation : public BinaryExpression
@@ -247,28 +237,3 @@ public:
     Interpolate(std::vector<std::shared_ptr<Expression>> _vectorExpression, std::shared_ptr<Number> _numInter);
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
-
-/*
-class SystemOfEquations : public Expression
-{
-public:
-    std::vector<std::shared_ptr<Equation>> system;
-private:
-    SystemOfEquations(std::vector<std::shared_ptr<Equation>> system) : system(system) {}
-
-    std::shared_ptr<Expression> eval(std::forward_list<std::shared_ptr<Expression>>) const override
-    {
-        std::vector<std::shared_ptr<Equation>> newEqSys;
-        for (auto exp : system)
-        {
-            auto element = exp->eval(std::forward_list<std::shared_ptr<Expression>>);
-            if (element = nullptr)
-            {
-                return nullptr;
-            }
-            newEqSys.push_back(std::dynamic_pointer_cast<Equation>(element));
-        }
-        return std::make_shared<Vector>(newEqSys);
-        return nullptr;
-    }
-};*/
