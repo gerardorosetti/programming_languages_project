@@ -39,6 +39,7 @@ void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
     {
         auto matrixExpression = std::dynamic_pointer_cast<Matrix>(exp)->getMatrixExpression();
         std::cout << ((name == "") ? "Matrix" : name) << " =" <<  std::endl;
+        std::cout << std::fixed << std::setprecision(4);
         for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
         {
             for (std::shared_ptr<Expression> expr : vec)
@@ -49,10 +50,11 @@ void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
                     std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
                     return;
                 }
-                std::cout << " " << num->getNumber();
+                std::cout << std::setw(8) << num->getNumber();
             }
             std::cout << std::endl;
         }
+        std::cout << std::defaultfloat << std::setprecision(6);
     } else if (value->getDataType() == DataType::Number)
     {
         auto num = std::dynamic_pointer_cast<Number>(exp);

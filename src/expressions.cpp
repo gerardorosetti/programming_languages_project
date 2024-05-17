@@ -207,6 +207,35 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     {
         return std::make_shared<Division>(exp1, exp2);
     }
+    else if (element1->getDataType() == DataType::Matrix && element2->getDataType() == DataType::Matrix)
+    {
+        auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1);
+        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2);
+        //std::cout << "TEST" << std::endl;
+        //return nullptr;
+        return std::make_shared<Multiplication>(matrix1, std::make_shared<InverseMatrix>(matrix2))->eval(env);
+        /*auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
+        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
+        if (matrix1.size() != matrix2.size())
+        {
+            return nullptr;
+        }
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (size_t i = 0; i < matrix1.size(); ++i)
+        {
+            if (matrix1[i].size() != matrix2[i].size())
+            {
+                return nullptr;
+            }
+            std::vector<std::shared_ptr<Expression>> newVec;
+            for (size_t j = 0; j < matrix1[i].size(); ++j)
+            {
+                newVec.push_back(std::make_shared<Multiplication>(matrix1[i][j], matrix2[i][j]));
+            }
+            newMatrix.push_back(newVec);
+        }
+        return std::make_shared<Matrix>(newMatrix)->eval(env);*/
+    }
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);
     if (num1 == nullptr || num2 == nullptr)
@@ -474,54 +503,53 @@ std::vector<std::vector<std::shared_ptr<Expression>>> InverseMatrix::gauss(std::
 
     for (size_t i = 0; i < size - 1; ++i)
     {
-        size_t IPV = i;
+        size_t primaryIndexPivot = i;
         for (size_t j = i + 1; j < size; ++j)
         {
-            if (std::abs(matrix[IPV][i]) < std::abs(matrix[j][i])) IPV = j;
-        }
-        if (IPV != i)
-        {
-            for (size_t JC = 0; JC < size * 2; ++JC)
+            if (std::abs(matrix[primaryIndexPivot][i]) < std::abs(matrix[j][i]))
             {
-                std::swap(matrix[i][JC], matrix[IPV][JC]);
+                primaryIndexPivot = j;
+            }
+        }
+        if (primaryIndexPivot != i)
+        {
+            for (size_t j = 0; j < size * 2; ++j)
+            {
+                std::swap(matrix[i][j], matrix[primaryIndexPivot][j]);
             }
         }
 
         if (matrix[i][i] == 0) // Singular Matrix Found
         {
             std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-            for (size_t i = 0; i < size; ++i)
+            for (size_t idx = 0; idx < size; ++idx)
             {
                 std::vector<std::shared_ptr<Expression>> newVector;
                 for (size_t j = 0; j < size; ++j)
                 {
-                    newVector.push_back(std::make_shared<Number>(matrix[i][j]));
+                    newVector.push_back(std::make_shared<Number>(matrix[idx][j]));
                 }
                 newMatrix.push_back(newVector);
             }
             return newMatrix;
         }
 
-        for (int JR = i + 1; JR < size; ++JR)
+        for (int jRow = i + 1; jRow < size; ++jRow)
         {
-            if (matrix[JR][i] != 0)
+            if (matrix[jRow][i] != 0)
             {
-                double R = matrix[JR][i] / matrix[i][i];
-                for (int KC = i + 1; KC < size * 2; ++KC)
+                double result = matrix[jRow][i] / matrix[i][i];
+                for (int jColumn = i + 1; jColumn < size * 2; ++jColumn)
                 {
-                    matrix[JR][KC] -= R * matrix[i][KC];
+                    double temp = matrix[jRow][jColumn];
+                    matrix[jRow][jColumn] -= result * matrix[i][jColumn];
+                    if (std::abs(matrix[jRow][jColumn]) < std::numeric_limits<double>::epsilon() * temp)
+                    {
+                        matrix[jRow][jColumn] = 0.0;
+                    }
                 }
             }
         }
-    }
-
-    for (size_t i = 0; i < size; ++i)
-    {
-        for (size_t j = 0; j < size; ++j)
-        {
-            std::cout << matrix[i][j] << " ";
-        }
-        std::cout << std::endl;
     }
 
     if (matrix[size - 1][size - 1] == 0) // Singular Matrix Found
@@ -542,14 +570,14 @@ std::vector<std::vector<std::shared_ptr<Expression>>> InverseMatrix::gauss(std::
     for (size_t m = size; m < size * 2; ++m)
     {
         matrix[size - 1][m] /= matrix[size - 1][size - 1];
-        for (int NV = size - 2; NV >= 0; --NV)
+        for (int newIdx = size - 2; newIdx >= 0; --newIdx)
         {
-            double VA = matrix[NV][m];
-            for (int K = NV + 1; K < size; ++K)
+            double temp = matrix[newIdx][m];
+            for (int k = newIdx + 1; k < size; ++k)
             {
-                VA -= matrix[NV][K] * matrix[K][m];
+                temp -= matrix[newIdx][k] * matrix[k][m];
             }
-            matrix[NV][m] = VA / matrix[NV][NV];
+            matrix[newIdx][m] = temp / matrix[newIdx][newIdx];
         }
     }
 

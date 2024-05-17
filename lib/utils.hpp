@@ -6,6 +6,8 @@
 #include <vector>
 #include <forward_list>
 #include <functional>
+#include <limits>
+#include <iomanip>
 
 enum class DataType
 {

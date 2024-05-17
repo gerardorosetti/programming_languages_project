@@ -41,6 +41,17 @@ void Test::ValuesTest()
 
     display.execute(m1);
     display.execute(m1inv, "Inverse Matrix");
+
+    // Matrix Division
+    std::vector<std::shared_ptr<Expression>> vecMat4 = {std::make_shared<Number>(1), std::make_shared<Number>(4), std::make_shared<Number>(9)};
+    std::vector<std::shared_ptr<Expression>> vecMat5 = {std::make_shared<Number>(-1), std::make_shared<Number>(-3), std::make_shared<Number>(-2)};
+    std::vector<std::shared_ptr<Expression>> vecMat6 = {std::make_shared<Number>(3), std::make_shared<Number>(2), std::make_shared<Number>(5)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma2 = {vecMat4, vecMat5, vecMat6};
+    std::shared_ptr<Expression> m2 = std::make_shared<Division>(m1, std::make_shared<Matrix>(ma2))->eval(emptyEnv);
+    display.execute(m2, "Matrix Division Test");
+
+    std::shared_ptr<Expression> m3 = std::make_shared<Division>(m1, m1)->eval(emptyEnv);
+    display.execute(m3, "Matrix Division Test 2");
 }
 
 void Test::AdditionTest()
