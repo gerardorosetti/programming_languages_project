@@ -11,6 +11,7 @@ public:
     static void EnvTest();
     static void AdditionTest();
     static void InverseMatrixTest();
+    static void MatrixLUTest();
     static void DivisionMatrixTest();
     static void IntegralTest();
     static void InterpolateTest();

@@ -51,7 +51,6 @@ void Test::EnvTest()
 
 void Test::AdditionTest()
 {
-    
     print.execute(nullptr, "\nAdition Value Test\n");
 
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
@@ -85,6 +84,30 @@ void Test::InverseMatrixTest()
     display.execute(m1inv, "Inverse Matrix");
 }
 
+void Test::MatrixLUTest()
+{
+    print.execute(nullptr, "\nLU Matrix Test\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    //{{2, 1, -3}, {-1, 3, 2}, {3, 1, -3}};
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+
+    std::shared_ptr<Expression> matrixPair = std::make_shared<MatrixLU>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
+
+    //std::shared_ptr<Expression> lowerMatrix = std::make_shared<PairFirst>(matrixPair);
+    //std::shared_ptr<Expression> upperMatrix = std::make_shared<PairSecond>(matrixPair);
+
+    display.execute(matrixPair);
+    //display.execute(m1);
+    //display.execute(m1inv, "Matrix LU");
+}
+
 void Test::DivisionMatrixTest()
 {
     print.execute(nullptr, "\nMatrix Division Test\n");
@@ -105,7 +128,7 @@ void Test::DivisionMatrixTest()
     display.execute(m2, "Matrix Division Test");
 
     std::shared_ptr<Expression> m3 = std::make_shared<Division>(m1, m1)->eval(emptyEnv);
-    display.execute(m3, "Matrix Division Test 2"); 
+    display.execute(m3, "Matrix Division Test 2");
 }
 
 void Test::IntegralTest()

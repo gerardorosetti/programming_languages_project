@@ -187,6 +187,26 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
+class MatrixLU : public Value
+{
+private:
+    std::shared_ptr<Matrix> matrix;
+    std::pair<std::vector<std::vector<std::shared_ptr<Expression>>>, std::vector<std::vector<std::shared_ptr<Expression>>>> lowerUpperDecomposition(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+public:
+    MatrixLU(std::shared_ptr<Matrix> _matrix);
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+};
+
+class Determinant : public Value
+{
+private:
+    std::shared_ptr<Matrix> matrix;
+    //std::pair<std::vector<std::vector<std::shared_ptr<Expression>>>, std::vector<std::vector<std::shared_ptr<Expression>>>> lowerUpperDecomposition(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+public:
+    Determinant(std::shared_ptr<Matrix> _matrix);
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+};
+
 class Equation : public BinaryExpression
 {
 public:

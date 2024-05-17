@@ -417,8 +417,13 @@ Matrix::Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpr
 std::shared_ptr<Expression> Matrix::eval(Environment& env) const
 {
     std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+    size_t rowSize = matrixExpression[0].size();
     for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
     {
+        if (vec.size() != rowSize) // Check if all rows have the same size
+        {
+            return nullptr;
+        }
         std::vector<std::shared_ptr<Expression>> newVector;
         for (std::shared_ptr<Expression> exp : vec)
         {
@@ -549,7 +554,6 @@ std::vector<std::vector<std::shared_ptr<Expression>>> InverseMatrix::gauss(std::
             matrix[newIdx][m] = temp / matrix[newIdx][newIdx];
         }
     }
-
     std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
     for (size_t i = 0; i < size; ++i)
     {
@@ -571,6 +575,141 @@ std::shared_ptr<Expression> InverseMatrix::eval(Environment& env) const
         return nullptr;
     }
     return std::make_shared<Matrix>(gauss(mat));
+}
+
+// LU Matrix
+MatrixLU::MatrixLU(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
+/*std::vector<std::vector<std::shared_ptr<Expression>>>*/
+std::pair<std::vector<std::vector<std::shared_ptr<Expression>>>, std::vector<std::vector<std::shared_ptr<Expression>>>> MatrixLU::lowerUpperDecomposition(std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression) const
+{
+    size_t size = matrixExpression.size();
+
+    double matrix[size][size];
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        for (size_t j = 0; j < size; ++j)
+        {
+            matrix[i][j] = std::dynamic_pointer_cast<Number>(matrixExpression[i][j])->getNumber();
+        }
+    }
+
+    auto L = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+    auto U = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+    for (int i = 0; i < size; ++i)
+    {
+        L[i][i] = 1.0;
+        for (int j = 0; j < size; ++j)
+        {
+            U[i][j] = matrix[i][j];
+        }
+    }
+
+    //P = std::vector<int>(n);
+    /*for (int i = 0; i < size; ++i)
+    {
+        P[i] = i;
+    }*/
+
+    for (int k = 0; k < size - 1; ++k)
+    {
+        int maxIndex = k;
+        double maxVal = std::abs(U[k][k]);
+        for (int i = k + 1; i < size; ++i)
+        {
+            if (std::abs(U[i][k]) > maxVal)
+            {
+                maxVal = std::abs(U[i][k]);
+                maxIndex = i;
+            }
+        }
+        if (maxIndex != k)
+        {
+            //std::swap(P[k], P[maxIndex]);
+            std::swap(U[k], U[maxIndex]);
+            for (int i = 0; i < k; ++i)
+            {
+                std::swap(L[k][i], L[maxIndex][i]);
+            }
+        }
+        for (int i = k + 1; i < size; ++i)
+        {
+            L[i][k] = U[i][k] / U[k][k];
+            for (int j = k; j < size; ++j)
+            {
+                U[i][j] -= L[i][k] * U[k][j];
+            }
+        }
+    }
+
+    //double det = 1.0;
+
+    /*for (int I = 0; I < size; ++I)
+    {
+        for (int M = 0; M < size; ++M)
+        {
+            if(I > 0 && M <= I)
+            {
+                std::cout << std::setw(8) << L[I][M];
+                matrix[I][M] = L[I][M];
+            }
+            else
+            {
+                std::cout << std::setw(8) << U[I][M];
+                matrix[I][M] = U[I][M];
+            }
+            //if (I == M) det *= U[I][M];
+        }
+        //std::cout << std::endl;
+    }*/
+
+    //setDeterminant(det);
+
+    std::vector<std::vector<std::shared_ptr<Expression>>> newMatrixLower;
+    std::vector<std::vector<std::shared_ptr<Expression>>> newMatrixUpper;
+    for (size_t i = 0; i < size; ++i)
+    {
+        //std::vector<std::shared_ptr<Expression>> newVector;
+        std::vector<std::shared_ptr<Expression>> newVectorLower;
+        std::vector<std::shared_ptr<Expression>> newVectorUpper;
+        for (size_t j = 0; j < size; ++j)
+        {
+            newVectorLower.push_back(std::make_shared<Number>(L[i][j]));
+            newVectorUpper.push_back(std::make_shared<Number>(U[i][j]));
+            //newVector.push_back(std::make_shared<Number>(matrix[i][j]));
+        }
+        newMatrixLower.push_back(newVectorLower);
+        newMatrixUpper.push_back(newVectorUpper);
+        //newMatrix.push_back(newVector);
+    }
+    return std::make_pair(newMatrixLower, newMatrixUpper);
+    //return newMatrix;
+}
+std::shared_ptr<Expression> MatrixLU::eval(Environment& env) const
+{
+    auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
+    auto mat = evMatrix->getMatrixExpression();
+    if (mat.size() != mat[0].size()) // Validation for a Square Matrix
+    {
+        return nullptr;
+    }
+    auto matrixPair = lowerUpperDecomposition(mat);
+    return std::make_shared<Pair>(std::make_shared<Matrix>(matrixPair.first), std::make_shared<Matrix>(matrixPair.second));
+}
+
+// Determinant
+Determinant::Determinant(std::shared_ptr<Matrix> _matrix) : Value(DataType::Number), matrix(_matrix) {}
+std::shared_ptr<Expression> Determinant::eval(Environment& env) const
+{
+    auto matrixPair = std::make_shared<MatrixLU>(matrix)->eval(env);
+    auto upperMatrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<PairSecond>(matrixPair));
+    auto U = upperMatrix->getMatrixExpression();
+    double det = 1;
+    for (int I = 0; I < U.size(); ++I)
+    {
+        det *= std::dynamic_pointer_cast<Number>(U[I][I])->getNumber();
+    }
+    return std::make_shared<Number>(((det < 0) ? -det : det));
 }
 
 //Equation
