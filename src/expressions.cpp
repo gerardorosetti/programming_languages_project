@@ -440,6 +440,61 @@ std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpressio
 {
     return matrixExpression;
 }
+std::shared_ptr<Number> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression, Environment& env)
+{
+    size_t size = matrixExpression.size();
+
+    double matrix[size][size + 1];
+
+    for (auto vector : matrixExpression)
+    {
+        for (auto number : vector)
+        {
+            matrix[vector.size() - 1][vector.size()] = number->eval(env)->getNumber();
+        }
+        
+    }
+    
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        size_t IPV = i;
+        for (size_t j = i + 1; j < size; ++j)
+        {
+            if (std::abs(std::dynamic_pointer_cast<Number>(matrix[IPV][i])->getNumber()) < std::abs(std::dynamic_pointer_cast<Number>(matrix[j][i])->getNumber())) IPV = j;
+        }
+        if (IPV != i)
+        {
+            for (int JC = 1; JC <= N + 1; ++JC)
+            {
+                std::swap(A[I][JC], A[IPV][JC]);
+            }
+        }
+        for (int JR = I + 1; JR <= N; ++JR)
+        {
+            if (A[JR][I] != 0)
+            {
+                double R = A[JR][I] / A[I][I];
+                for (int KC = I + 1; KC <= N + 1; ++KC)
+                {
+                    A[JR][KC] -= R * A[I][KC];
+                }
+            }
+        }
+    }
+    //sustitucion hacia atras
+    if (A[N][N] == 0) return;
+    A[N][N + 1] /= A[N][N];
+    for (int NV = N - 1; NV >= 1; --NV)
+    {
+        double VA = A[NV][N + 1];
+        for (int K = NV + 1; K <= N; ++K)
+        {
+            VA -= A[NV][K] * A[K][N + 1];
+        }
+        A[NV][N + 1] = VA / A[NV][NV];
+    }
+}
 
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const

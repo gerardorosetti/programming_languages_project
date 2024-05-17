@@ -1,10 +1,9 @@
-#include <iostream>
-#include "expressions.hpp"
-#include "statements.hpp"
+#include "test.hpp"
 
 int main()
 {
-
+    Test::AdditionTest();
+    /*
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
     std::shared_ptr<Expression> num1 = std::make_shared<Number>(10);
@@ -104,6 +103,12 @@ int main()
     std::shared_ptr<Statement> display_matrix3 = std::make_shared<Display>(matrix3);
     display_matrix3->execute();
     //Display{matrix3};
+
+
+
+
+
+    */
 
     return 0;
 }

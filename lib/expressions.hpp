@@ -1,29 +1,12 @@
-#pragma once 
+#pragma once
 
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <forward_list>
-#include <functional>
-
-enum class DataType
-{
-    Pair,
-    Vector,
-    Matrix,
-    Number,
-    Variable
-};
-
+#include "utils.hpp"
 class Expression
 {
 public:
-    virtual std::shared_ptr<Expression> eval(std::forward_list<std::pair<char, std::shared_ptr<Expression>>>&) const = 0;
+    virtual std::shared_ptr<Expression> eval(Environment&) const = 0;
     virtual ~Expression() {}
 };
-
-using Environment = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>;
 
 class Value : public Expression
 {
@@ -31,7 +14,6 @@ protected:
     DataType dataType;
 public:
     Value(DataType _dataType);
-    //Value();
     DataType getDataType() const;
 };
 
@@ -188,6 +170,7 @@ class Matrix : public Value
 {
 protected:
     std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression;
+    std::shared_ptr<Number> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix, Environment& env) const;
 public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
