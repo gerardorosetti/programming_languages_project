@@ -20,6 +20,3 @@ class Expression;
 class Statement;
 
 using Environment = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>;
-
-using ExpressionPtr = std::shared_ptr<Expression>;
-using StatementPtr = std::shared_ptr<Statement>;

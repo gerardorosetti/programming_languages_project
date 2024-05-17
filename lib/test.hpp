@@ -10,4 +10,5 @@ public:
     static void ValuesTest();
     static void AdditionTest();
     static void IntegralTest();
+    static void InterpolateTest();
 };

@@ -3,6 +3,9 @@
 int main()
 {
     Test::AdditionTest();
+    Test::ValuesTest();
+    Test::IntegralTest();
+    Test::InterpolateTest();
     /*
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 

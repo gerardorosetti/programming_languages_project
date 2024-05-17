@@ -1,8 +1,10 @@
 #include "statements.hpp"
 
-Statement::Statement(std::shared_ptr<Expression> _exp) :  exp(_exp) {}
-
-void Display::execute() const
+Display& Display::getInstance() {
+    static Display instance;
+    return instance;
+}
+void Display::execute(std::shared_ptr<Expression> exp) const
 {
     auto value = std::dynamic_pointer_cast<Value>(exp);
     if (value == nullptr)
@@ -12,25 +14,39 @@ void Display::execute() const
     }
 
     if (value->getDataType() == DataType::Pair)
-    {/*
-        auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}->getNumber());
-        auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}->getNumber());
+    {
+        auto pairExpression = std::dynamic_pointer_cast<Pair>(exp);
+        if (pairExpression == nullptr) 
+        {
+            std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
+            return;
+        }
+        auto to = std::dynamic_pointer_cast<Number>(pairExpression->getFirst());
+        auto tf = std::dynamic_pointer_cast<Number>(pairExpression->getSecond());
+        if (to == nullptr || tf == nullptr)
+        {
+            std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
+            return;
+        }
         
-        std::cout<< << std::endl;*/
+        std::cout<<"Pair = ["<< to->getNumber() <<", "<< tf->getNumber() <<"]" << std::endl;
+    }
+    else if (value->getDataType() == DataType::Vector)
+    {
+     //TO DO ADD GET VECTOR EXPRESSION   
     }
     else if (value->getDataType() == DataType::Matrix)
     {
         auto matrixExpression = std::dynamic_pointer_cast<Matrix>(exp)->getMatrixExpression();
-        std::cout << "Matrix =\n\n";
+        std::cout << "Matrix =" <<  std::endl;
         for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
         {
             for (std::shared_ptr<Expression> expr : vec)
             {
-                //Statement::Statement{std::make_shared<Display>(expr)}.execute();
                 auto num = std::dynamic_pointer_cast<Number>(expr);
                 if (num == nullptr)
                 {
-                    std::cout << "cannot display data type incorrect" << std::endl;
+                    std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
                     return;
                 }
                 std::cout << " " << num->getNumber();
@@ -42,9 +58,19 @@ void Display::execute() const
         auto num = std::dynamic_pointer_cast<Number>(exp);
         if (num == nullptr)
         {
-            std::cout << "cannot display data type incorrect" << std::endl;
+            std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
             return;
         }
         std::cout << "Number = " << num->getNumber() << std::endl;
+    }
+    else if (value->getDataType() == DataType::Variable)
+    {
+        auto var = std::dynamic_pointer_cast<Variable>(exp);
+        if (var == nullptr)
+        {
+            std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
+            return;
+        }
+        std::cout << "Variable = " << var->getVariable() << std::endl;
     }
 }
