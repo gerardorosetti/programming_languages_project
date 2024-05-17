@@ -164,6 +164,7 @@ protected:
 public:
     Vector(std::vector<std::shared_ptr<Expression>> _vectorExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::vector<std::shared_ptr<Expression>> getVectorExpression() const;
 };
 
 class Matrix : public Value

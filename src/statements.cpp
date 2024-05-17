@@ -1,6 +1,7 @@
 #include "statements.hpp"
 
-Display& Display::getInstance() {
+Display& Display::getInstance() 
+{
     static Display instance;
     return instance;
 }
@@ -33,7 +34,19 @@ void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
     }
     else if (value->getDataType() == DataType::Vector)
     {
-     //TO DO ADD GET VECTOR EXPRESSION
+        auto vectorExpression = std::dynamic_pointer_cast<Vector>(exp)->getVectorExpression();
+        std::cout << "Vector = [";
+        for (std::shared_ptr<Expression> i : vectorExpression)
+        {
+            auto num = std::dynamic_pointer_cast<Number>(i);
+            if (num == nullptr)
+            {
+                std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
+                return;
+            }
+            std::cout << " " << num->getNumber();
+        }
+        std::cout << " ]"<< std::endl;
     }
     else if (value->getDataType() == DataType::Matrix)
     {
@@ -75,4 +88,14 @@ void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
         }
         std::cout << "Variable = " << var->getVariable() << std::endl;
     }
+}
+
+Print& Print::getInstance() 
+{
+    static Print instance;
+    return instance;
+}
+void Print::execute(std::shared_ptr<Expression> expr, std::string toPrint) const
+{
+    std::cout << toPrint;
 }

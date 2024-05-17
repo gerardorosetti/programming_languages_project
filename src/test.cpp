@@ -1,14 +1,17 @@
 #include "test.hpp"
 
 Display& display = Display::getInstance();
+Print& print = Print::getInstance();
 
 void Test::ValuesTest()
 {
+    print.execute(nullptr,"\nValues Test \n");
+
     std::shared_ptr<Expression> pair1 = std::make_shared<Pair>(std::make_shared<Number>(5), std::make_shared<Number>(10));
 
     display.execute(pair1);
 
-    std::vector<std::shared_ptr<Expression>> vect1 = {std::make_shared<Number>(2), std::make_shared<Number>(3)};
+    std::vector<std::shared_ptr<Expression>> vect1 = {std::make_shared<Number>(2), std::make_shared<Number>(3), std::make_shared<Number>(10)};
     std::shared_ptr<Expression> expVect1 = std::make_shared<Vector>(vect1);
 
     display.execute(expVect1);
@@ -28,33 +31,13 @@ void Test::ValuesTest()
 
     display.execute(var1);
 
-    // Inverse Matrix
-    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
-    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
-    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
-    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
-    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
-
-    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
-    std::shared_ptr<Expression> m1inv = std::make_shared<InverseMatrix>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
-
-    display.execute(m1);
-    display.execute(m1inv, "Inverse Matrix");
-
-    // Matrix Division
-    std::vector<std::shared_ptr<Expression>> vecMat4 = {std::make_shared<Number>(1), std::make_shared<Number>(4), std::make_shared<Number>(9)};
-    std::vector<std::shared_ptr<Expression>> vecMat5 = {std::make_shared<Number>(-1), std::make_shared<Number>(-3), std::make_shared<Number>(-2)};
-    std::vector<std::shared_ptr<Expression>> vecMat6 = {std::make_shared<Number>(3), std::make_shared<Number>(2), std::make_shared<Number>(5)};
-    std::vector<std::vector<std::shared_ptr<Expression>>> ma2 = {vecMat4, vecMat5, vecMat6};
-    std::shared_ptr<Expression> m2 = std::make_shared<Division>(m1, std::make_shared<Matrix>(ma2))->eval(emptyEnv);
-    display.execute(m2, "Matrix Division Test");
-
-    std::shared_ptr<Expression> m3 = std::make_shared<Division>(m1, m1)->eval(emptyEnv);
-    display.execute(m3, "Matrix Division Test 2");
 }
 
 void Test::AdditionTest()
 {
+    
+    print.execute(nullptr, "\nAdition Value Test\n");
+
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
     std::shared_ptr<Expression> num1 = std::make_shared<Number>(10);
@@ -64,14 +47,55 @@ void Test::AdditionTest()
 
     std::shared_ptr<Expression> result = sum->eval(emptyEnv);
 
-    std::cout << "Addition Value : ";
-
     display.execute(result);
 
 };
 
+void Test::InverseMatrixTest()
+{
+    print.execute(nullptr, "\nInverse Matrix Test\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+
+    std::shared_ptr<Expression> m1inv = std::make_shared<InverseMatrix>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
+
+    display.execute(m1);
+    display.execute(m1inv, "Inverse Matrix");
+}
+
+void Test::DivisionMatrixTest()
+{
+    print.execute(nullptr, "\nMatrix Division Test\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+
+    std::vector<std::shared_ptr<Expression>> vecMat4 = {std::make_shared<Number>(1), std::make_shared<Number>(4), std::make_shared<Number>(9)};
+    std::vector<std::shared_ptr<Expression>> vecMat5 = {std::make_shared<Number>(-1), std::make_shared<Number>(-3), std::make_shared<Number>(-2)};
+    std::vector<std::shared_ptr<Expression>> vecMat6 = {std::make_shared<Number>(3), std::make_shared<Number>(2), std::make_shared<Number>(5)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma2 = {vecMat4, vecMat5, vecMat6};
+    std::shared_ptr<Expression> m2 = std::make_shared<Division>(m1, std::make_shared<Matrix>(ma2))->eval(emptyEnv);
+    display.execute(m2, "Matrix Division Test");
+
+    std::shared_ptr<Expression> m3 = std::make_shared<Division>(m1, m1)->eval(emptyEnv);
+    display.execute(m3, "Matrix Division Test 2"); 
+}
+
 void Test::IntegralTest()
 {
+    print.execute(nullptr, "\nIntegral Test\n");
+
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
     std::shared_ptr<Expression> to = std::make_shared<Number>(0);
@@ -84,7 +108,7 @@ void Test::IntegralTest()
 
     std::shared_ptr<Expression> integral = std::make_shared<Integral>(std::make_shared<Pair>(to,tf), std::make_shared<Function>(sum),  std::dynamic_pointer_cast<Variable>(letter));
 
-    std::cout << "Integer Value : ";
+    print.execute(nullptr, "Integral Value : ");
 
     std::shared_ptr<Expression> result = integral->eval(emptyEnv);
 
@@ -94,6 +118,8 @@ void Test::IntegralTest()
 
 void Test::InterpolateTest()
 {
+    print.execute(nullptr, "\nInterpolate Test\n");
+
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
     std::vector<std::shared_ptr<Expression>> vectorExpression =
@@ -109,7 +135,7 @@ void Test::InterpolateTest()
 
     std::shared_ptr<Expression> interpolate = std::make_shared<Interpolate>(vectorExpression, std::make_shared<Number>(15.0));
 
-    std::cout << "Interpolate Value : ";
+    print.execute(nullptr, "Interpolate Value : ");
     std::shared_ptr<Expression> result = interpolate->eval(emptyEnv);
 
     display.execute(result);

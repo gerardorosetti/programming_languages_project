@@ -2,8 +2,10 @@
 
 int main()
 {
-    Test::AdditionTest();
     Test::ValuesTest();
+    Test::AdditionTest();
+    Test::InverseMatrixTest();
+    Test::DivisionMatrixTest();
     Test::IntegralTest();
     Test::InterpolateTest();
     /*

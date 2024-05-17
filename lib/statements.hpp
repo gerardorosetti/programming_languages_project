@@ -19,3 +19,14 @@ private:
     Display(const Display&) = delete;
     Display& operator= (const Display&) = delete;
 };
+
+class Print :public Statement
+{
+public:
+    static Print& getInstance();
+    void execute(std::shared_ptr<Expression>, std::string toPrint) const override;
+private:
+    Print() {}
+    Print(const Print&) = delete;
+    Print& operator= (const Print&) = delete; 
+};

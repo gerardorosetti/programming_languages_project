@@ -407,6 +407,11 @@ std::shared_ptr<Expression> Vector::eval(Environment& env) const
     return std::make_shared<Vector>(newVector);
 }
 
+std::vector<std::shared_ptr<Expression>> Vector::getVectorExpression() const
+{
+    return vectorExpression;
+}
+
 //Matrix
 Matrix::Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression) : Value(DataType::Matrix), matrixExpression(_matrixExpression) {}
 std::shared_ptr<Expression> Matrix::eval(Environment& env) const

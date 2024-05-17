@@ -9,6 +9,8 @@ class Test
 public:
     static void ValuesTest();
     static void AdditionTest();
+    static void InverseMatrixTest();
+    static void DivisionMatrixTest();
     static void IntegralTest();
     static void InterpolateTest();
 };
