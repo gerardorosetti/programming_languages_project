@@ -568,51 +568,13 @@ std::vector<std::vector<std::shared_ptr<Expression>>> InverseMatrix::gauss(std::
 std::shared_ptr<Expression> InverseMatrix::eval(Environment& env) const
 {
     auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
-    return std::make_shared<Matrix>(gauss(evMatrix->getMatrixExpression()));
-}
-/*
-void gauss(int N, std::vector<std::vector<double>>& A)
-{
-    for (int I = 1; I < N; ++I)
+    auto mat = evMatrix->getMatrixExpression();
+    if (mat.size() != mat[0].size()) // Validation for a Square Matrix
     {
-        int IPV = I;
-        for (int J = I + 1; J <= N; ++J)
-        {
-            if (std::abs(A[IPV][I]) < std::abs(A[J][I])) IPV = J;
-        }
-        if (IPV != I)
-        {
-            for (int JC = 1; JC <= N + 1; ++JC)
-            {
-                std::swap(A[I][JC], A[IPV][JC]);
-            }
-        }
-        for (int JR = I + 1; JR <= N; ++JR)
-        {
-            if (A[JR][I] != 0)
-            {
-                double R = A[JR][I] / A[I][I];
-                for (int KC = I + 1; KC <= N + 1; ++KC)
-                {
-                    A[JR][KC] -= R * A[I][KC];
-                }
-            }
-        }
+        return nullptr;
     }
-    //sustitucion hacia atras
-    if (A[N][N] == 0) return;
-    A[N][N + 1] /= A[N][N];
-    for (int NV = N - 1; NV >= 1; --NV)
-    {
-        double VA = A[NV][N + 1];
-        for (int K = NV + 1; K <= N; ++K)
-        {
-            VA -= A[NV][K] * A[K][N + 1];
-        }
-        A[NV][N + 1] = VA / A[NV][NV];
-    }
+    return std::make_shared<Matrix>(gauss(mat));
 }
-*/
 
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const
