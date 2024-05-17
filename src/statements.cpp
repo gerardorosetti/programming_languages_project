@@ -4,7 +4,7 @@ Display& Display::getInstance() {
     static Display instance;
     return instance;
 }
-void Display::execute(std::shared_ptr<Expression> exp) const
+void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
 {
     auto value = std::dynamic_pointer_cast<Value>(exp);
     if (value == nullptr)
@@ -16,7 +16,7 @@ void Display::execute(std::shared_ptr<Expression> exp) const
     if (value->getDataType() == DataType::Pair)
     {
         auto pairExpression = std::dynamic_pointer_cast<Pair>(exp);
-        if (pairExpression == nullptr) 
+        if (pairExpression == nullptr)
         {
             std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
             return;
@@ -28,17 +28,17 @@ void Display::execute(std::shared_ptr<Expression> exp) const
             std::cout << "CANNOT DISPLAY DATA TYPE INCORRECT" << std::endl;
             return;
         }
-        
+
         std::cout<<"Pair = ["<< to->getNumber() <<", "<< tf->getNumber() <<"]" << std::endl;
     }
     else if (value->getDataType() == DataType::Vector)
     {
-     //TO DO ADD GET VECTOR EXPRESSION   
+     //TO DO ADD GET VECTOR EXPRESSION
     }
     else if (value->getDataType() == DataType::Matrix)
     {
         auto matrixExpression = std::dynamic_pointer_cast<Matrix>(exp)->getMatrixExpression();
-        std::cout << "Matrix =" <<  std::endl;
+        std::cout << ((name == "") ? "Matrix" : name) << " =" <<  std::endl;
         for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
         {
             for (std::shared_ptr<Expression> expr : vec)

@@ -5,7 +5,7 @@ Display& display = Display::getInstance();
 void Test::ValuesTest()
 {
     std::shared_ptr<Expression> pair1 = std::make_shared<Pair>(std::make_shared<Number>(5), std::make_shared<Number>(10));
-    
+
     display.execute(pair1);
 
     std::vector<std::shared_ptr<Expression>> vect1 = {std::make_shared<Number>(2), std::make_shared<Number>(3)};
@@ -27,6 +27,20 @@ void Test::ValuesTest()
     std::shared_ptr<Expression> var1 = std::make_shared<Variable>('A');
 
     display.execute(var1);
+
+    // Inverse Matrix
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+    std::shared_ptr<Expression> m1inv = std::make_shared<InverseMatrix>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
+
+    display.execute(m1);
+    display.execute(m1inv, "Inverse Matrix");
 }
 
 void Test::AdditionTest()

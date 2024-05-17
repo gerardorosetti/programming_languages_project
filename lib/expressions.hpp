@@ -170,11 +170,20 @@ class Matrix : public Value
 {
 protected:
     std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression;
-    std::shared_ptr<Number> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix, Environment& env) const;
 public:
     Matrix(std::vector<std::vector<std::shared_ptr<Expression>>> _matrixExpression);
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::vector<std::vector<std::shared_ptr<Expression>>> getMatrixExpression() const;
+};
+
+class InverseMatrix : public Value
+{
+private:
+    std::shared_ptr<Matrix> matrix;
+    std::vector<std::vector<std::shared_ptr<Expression>>> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+public:
+    InverseMatrix(std::shared_ptr<Matrix> _matrix);
+    std::shared_ptr<Expression> eval(Environment& env) const override;
 };
 
 class Equation : public BinaryExpression

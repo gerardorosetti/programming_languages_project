@@ -440,60 +440,135 @@ std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpressio
 {
     return matrixExpression;
 }
-std::shared_ptr<Number> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression, Environment& env)
+
+// Inverse Matrix
+InverseMatrix::InverseMatrix(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
+std::vector<std::vector<std::shared_ptr<Expression>>> InverseMatrix::gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrixExpression) const
 {
     size_t size = matrixExpression.size();
 
-    double matrix[size][size + 1];
-
-    for (auto vector : matrixExpression)
-    {
-        for (auto number : vector)
-        {
-            matrix[vector.size() - 1][vector.size()] = number->eval(env)->getNumber();
-        }
-        
-    }
-    
+    double matrix[size][size * 2];
 
     for (size_t i = 0; i < size; ++i)
+    {
+        for (size_t j = 0; j < size; ++j)
+        {
+            matrix[i][j] = std::dynamic_pointer_cast<Number>(matrixExpression[i][j])->getNumber();
+        }
+    }
+
+    for (size_t i = size, k = 0; i < size * 2; ++i ,++k)
+    {
+        for (size_t j = size; j < size * 2; ++j)
+        {
+            if (i == j)
+            {
+                matrix[k][j] = 1.0;
+            }
+            else
+            {
+                matrix[k][j] = 0.0;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < size - 1; ++i)
     {
         size_t IPV = i;
         for (size_t j = i + 1; j < size; ++j)
         {
-            if (std::abs(std::dynamic_pointer_cast<Number>(matrix[IPV][i])->getNumber()) < std::abs(std::dynamic_pointer_cast<Number>(matrix[j][i])->getNumber())) IPV = j;
+            if (std::abs(matrix[IPV][i]) < std::abs(matrix[j][i])) IPV = j;
         }
         if (IPV != i)
         {
-            for (int JC = 1; JC <= N + 1; ++JC)
+            for (size_t JC = 0; JC < size * 2; ++JC)
             {
-                std::swap(A[I][JC], A[IPV][JC]);
+                std::swap(matrix[i][JC], matrix[IPV][JC]);
             }
         }
-        for (int JR = I + 1; JR <= N; ++JR)
+
+        if (matrix[i][i] == 0) // Singular Matrix Found
         {
-            if (A[JR][I] != 0)
+            std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+            for (size_t i = 0; i < size; ++i)
             {
-                double R = A[JR][I] / A[I][I];
-                for (int KC = I + 1; KC <= N + 1; ++KC)
+                std::vector<std::shared_ptr<Expression>> newVector;
+                for (size_t j = 0; j < size; ++j)
                 {
-                    A[JR][KC] -= R * A[I][KC];
+                    newVector.push_back(std::make_shared<Number>(matrix[i][j]));
+                }
+                newMatrix.push_back(newVector);
+            }
+            return newMatrix;
+        }
+
+        for (int JR = i + 1; JR < size; ++JR)
+        {
+            if (matrix[JR][i] != 0)
+            {
+                double R = matrix[JR][i] / matrix[i][i];
+                for (int KC = i + 1; KC < size * 2; ++KC)
+                {
+                    matrix[JR][KC] -= R * matrix[i][KC];
                 }
             }
         }
     }
-    //sustitucion hacia atras
-    if (A[N][N] == 0) return;
-    A[N][N + 1] /= A[N][N];
-    for (int NV = N - 1; NV >= 1; --NV)
+
+    for (size_t i = 0; i < size; ++i)
     {
-        double VA = A[NV][N + 1];
-        for (int K = NV + 1; K <= N; ++K)
+        for (size_t j = 0; j < size; ++j)
         {
-            VA -= A[NV][K] * A[K][N + 1];
+            std::cout << matrix[i][j] << " ";
         }
-        A[NV][N + 1] = VA / A[NV][NV];
+        std::cout << std::endl;
     }
+
+    if (matrix[size - 1][size - 1] == 0) // Singular Matrix Found
+    {
+        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        for (size_t i = 0; i < size; ++i)
+        {
+            std::vector<std::shared_ptr<Expression>> newVector;
+            for (size_t j = 0; j < size; ++j)
+            {
+                newVector.push_back(std::make_shared<Number>(matrix[i][j]));
+            }
+            newMatrix.push_back(newVector);
+        }
+        return newMatrix;
+    }
+
+    for (size_t m = size; m < size * 2; ++m)
+    {
+        matrix[size - 1][m] /= matrix[size - 1][size - 1];
+        for (int NV = size - 2; NV >= 0; --NV)
+        {
+            double VA = matrix[NV][m];
+            for (int K = NV + 1; K < size; ++K)
+            {
+                VA -= matrix[NV][K] * matrix[K][m];
+            }
+            matrix[NV][m] = VA / matrix[NV][NV];
+        }
+    }
+
+    std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+    for (size_t i = 0; i < size; ++i)
+    {
+        std::vector<std::shared_ptr<Expression>> newVector;
+        for (size_t j = size; j < size * 2; ++j)
+        {
+            newVector.push_back(std::make_shared<Number>(matrix[i][j]));
+        }
+        newMatrix.push_back(newVector);
+    }
+    return newMatrix;
+}
+std::shared_ptr<Expression> InverseMatrix::eval(Environment& env) const
+{
+    auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
+    return std::make_shared<Matrix>(gauss(evMatrix->getMatrixExpression()));
 }
 /*
 void gauss(int N, std::vector<std::vector<double>>& A)
