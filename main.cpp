@@ -3,6 +3,7 @@
 int main()
 {
     Test::ValuesTest();
+    Test::EnvTest();
     Test::AdditionTest();
     Test::InverseMatrixTest();
     Test::DivisionMatrixTest();

@@ -8,6 +8,7 @@ class Test
 {
 public:
     static void ValuesTest();
+    static void EnvTest();
     static void AdditionTest();
     static void InverseMatrixTest();
     static void DivisionMatrixTest();

@@ -17,7 +17,7 @@ void Test::ValuesTest()
     display.execute(expVect1);
 
     std::vector<std::shared_ptr<Expression>> vec1 = {std::make_shared<Number>(2), std::make_shared<Number>(3)};
-    std::vector<std::shared_ptr<Expression>> vec2 = {std::make_shared<Number>(4), std::make_shared<Number>(5)};
+    std::vector<std::shared_ptr<Expression>> vec2 = {std::make_shared<Number>(4), std::make_shared<Variable>('B')};
     std::vector<std::vector<std::shared_ptr<Expression>>> mat1 = {vec1, vec2};
     std::shared_ptr<Expression> expMat1 = std::make_shared<Matrix>(mat1);
 
@@ -30,7 +30,23 @@ void Test::ValuesTest()
     std::shared_ptr<Expression> var1 = std::make_shared<Variable>('A');
 
     display.execute(var1);
+}
 
+void Test::EnvTest()
+{
+    print.execute(nullptr, "\nEnvironment Test\n");
+
+    Environment env = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::vector<std::shared_ptr<Expression>> vec1 = {std::make_shared<Number>(2), std::make_shared<Number>(3)};
+    std::vector<std::shared_ptr<Expression>> vec2 = {std::make_shared<Number>(4), std::make_shared<Variable>('B')};
+    std::vector<std::vector<std::shared_ptr<Expression>>> mat1 = {vec1, vec2};
+    std::shared_ptr<Expression> expMat1 = std::make_shared<Matrix>(mat1);
+
+    env.push_front(std::make_pair('B', std::make_shared<Number>(10)));
+
+    display.execute(expMat1);
+    display.execute(expMat1->eval(env));
 }
 
 void Test::AdditionTest()
