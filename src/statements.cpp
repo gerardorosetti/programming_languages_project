@@ -12,11 +12,11 @@ void Display::execute() const
     }
 
     if (value->getDataType() == DataType::Pair)
-    {
+    {/*
         auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}->getNumber());
         auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}->getNumber());
         
-        std::cout<< << std::endl;
+        std::cout<< << std::endl;*/
     }
     else if (value->getDataType() == DataType::Matrix)
     {
