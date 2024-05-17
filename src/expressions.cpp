@@ -76,8 +76,6 @@ std::shared_ptr<Expression> Addition::eval(Environment& env) const
             std::vector<std::shared_ptr<Expression>> newVec;
             for (size_t j = 0; j < matrix1[i].size(); ++j)
             {
-                //auto add = Addition(matrix1[i][j], matrix2[i][j]);
-                //std::cout << std::dynamic_pointer_cast<Number>(matrix1[i][j]->eval(env))->getNumber() << " - " << std::dynamic_pointer_cast<Number>(matrix2[i][j]->eval(env))->getNumber() << std::endl;
                 newVec.push_back(std::make_shared<Addition>(matrix1[i][j], matrix2[i][j]));
             }
             newMatrix.push_back(newVec);
@@ -155,10 +153,6 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
     {
         auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
         auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
-        /*if (matrix1.size() != matrix2.size())
-        {
-            return nullptr;
-        }*/
         std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
         for (size_t i = 0; i < matrix1.size(); ++i)
         {
@@ -169,14 +163,10 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
             std::vector<std::shared_ptr<Expression>> newVec;
             for (size_t j = 0; j < matrix2[i].size(); ++j)
             {
-                //double acc = 0.0;
-                //std::shared_ptr<Number> acc = std::make_shared<Number>(0.0);
                 std::shared_ptr<Expression> acc = std::make_shared<Number>(0.0);
                 for (size_t k1 = 0, k2 = 0; k1 < matrix2[i].size(); ++k1, ++k2)
                 {
-                    //acc = std::dynamic_pointer_cast<Number>(std::make_shared<Addition>(acc, std::make_shared<Multiplication>(matrix1[i][k1], matrix2[k2][j]))->eval(env));
                     acc = std::make_shared<Addition>(acc, std::make_shared<Multiplication>(matrix1[i][k1], matrix2[k2][j]));
-                    //acc += std::dynamic_pointer_cast<Number>(std::make_shared<Addition>(std::make_shared<Number>(acc), ma))->getValue();
                 }
                 newVec.push_back(acc);
             }
@@ -211,30 +201,8 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     {
         auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1);
         auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2);
-        //std::cout << "TEST" << std::endl;
-        //return nullptr;
+
         return std::make_shared<Multiplication>(matrix1, std::make_shared<InverseMatrix>(matrix2))->eval(env);
-        /*auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
-        auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
-        if (matrix1.size() != matrix2.size())
-        {
-            return nullptr;
-        }
-        std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-        for (size_t i = 0; i < matrix1.size(); ++i)
-        {
-            if (matrix1[i].size() != matrix2[i].size())
-            {
-                return nullptr;
-            }
-            std::vector<std::shared_ptr<Expression>> newVec;
-            for (size_t j = 0; j < matrix1[i].size(); ++j)
-            {
-                newVec.push_back(std::make_shared<Multiplication>(matrix1[i][j], matrix2[i][j]));
-            }
-            newMatrix.push_back(newVec);
-        }
-        return std::make_shared<Matrix>(newMatrix)->eval(env);*/
     }
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);
@@ -451,10 +419,6 @@ std::shared_ptr<Expression> Matrix::eval(Environment& env) const
         {
             auto element = exp->eval(env);
             auto num = std::dynamic_pointer_cast<Number>(element);
-            /*if (element = nullptr)
-            {
-                return nullptr;
-            }*/
             if (num == nullptr)
             {
                 return nullptr;
