@@ -812,17 +812,17 @@ std::string MatrixLU::toString() const noexcept
 TridiagonalMatrix::TridiagonalMatrix(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
 std::vector<std::vector<std::shared_ptr<Expression>>> TridiagonalMatrix::tridiagonal(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
 {
-    size_t N = matrix.size() + 1;
-    std::vector<std::vector<double>> A(N, std::vector<double>(N)), T(N, std::vector<double>(N));
-    for (size_t i = 1; i < N; ++i)
+    size_t N = matrix.size();
+    std::vector<std::vector<double>> A(N + 1, std::vector<double>(N + 1)), T(N + 1, std::vector<double>(N + 1));
+    for (size_t i = 1; i <= N; ++i)
     {
-        for (size_t j = 1; j < N; ++j)
+        for (size_t j = 1; j <= N; ++j)
         {
             A[i][j] = std::dynamic_pointer_cast<Number>(matrix[i - 1][j - 1])->getNumber();
         }
     }
 
-    std::vector<double> U(N);
+    std::vector<double> U(N + 1);
     for (int IR = 1; IR <= N - 2; ++IR)
     {
         double S = 0;
@@ -873,10 +873,10 @@ std::vector<std::vector<std::shared_ptr<Expression>>> TridiagonalMatrix::tridiag
     }
 
     std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-    for (size_t i = 1; i < N; ++i)
+    for (size_t i = 1; i <= N; ++i)
     {
         std::vector<std::shared_ptr<Expression>> newVector;
-        for (size_t j = 1; j < N; ++j)
+        for (size_t j = 1; j <= N; ++j)
         {
             newVector.push_back(std::make_shared<Number>(A[i][j]));
         }

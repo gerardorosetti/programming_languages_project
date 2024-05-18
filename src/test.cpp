@@ -146,7 +146,7 @@ void Test::TridiagonalMatrixTest()
 
     std::shared_ptr<Expression> trid = std::make_shared<TridiagonalMatrix>(std::dynamic_pointer_cast<Matrix>(m1));//->eval(emptyEnv);
 
-    display.execute(trid);
+    display.execute(trid->eval(emptyEnv));
 }
 
 void Test::DeterminantTest()
