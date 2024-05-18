@@ -7,7 +7,9 @@ Display& Display::getInstance()
 }
 void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
 {
-    auto value = std::dynamic_pointer_cast<Value>(exp);
+    std::cout << exp->toString() << std::endl;
+    
+    /*auto value = std::dynamic_pointer_cast<Value>(exp);
     if (value == nullptr)
     {
         std::cout << "COULD NOT DISPLAY A NON VALUE EXPRESSION" << std::endl;
@@ -76,7 +78,7 @@ void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
             std::cout << std::endl;
         }
         std::cout << std::defaultfloat << std::setprecision(6);
-    }
+    }*/
 }
 
 Print& Print::getInstance() 

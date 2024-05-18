@@ -8,7 +8,7 @@ public:
     virtual void execute(std::shared_ptr<Expression>, std::string) const = 0;
     virtual ~Statement() {}
 };
-//Singleton
+
 class Display : public Statement
 {
 public:
@@ -28,5 +28,5 @@ public:
 private:
     Print() {}
     Print(const Print&) = delete;
-    Print& operator= (const Print&) = delete; 
+    Print& operator= (const Print&) = delete;
 };

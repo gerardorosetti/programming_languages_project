@@ -19,6 +19,10 @@ std::shared_ptr<Expression> Number::eval(Environment& env) const
 {
     return std::make_shared<Number>(number);
 }
+std::string Number::toString() const noexcept
+{
+    return std::to_string(number);
+}
 double Number::getNumber() const
 {
     return number;
@@ -41,6 +45,10 @@ std::shared_ptr<Expression> Variable::eval(Environment& env) const
         return nullptr;
     }
     return std::make_shared<Variable>(variable);
+}
+std::string Variable::toString() const noexcept
+{
+    return std::string{variable};
 }
 char Variable::getVariable() const
 {
@@ -91,6 +99,10 @@ std::shared_ptr<Expression> Addition::eval(Environment& env) const
     double result = num1->getNumber() + num2->getNumber();
     return std::make_shared<Number>(result);
 };
+std::string Addition::toString() const noexcept
+{
+    return leftExpression->toString() + " + " + rigthExpression->toString();
+}
 
 //Subtraction
 std::shared_ptr<Expression> Subtraction::eval(Environment& env) const
@@ -136,6 +148,11 @@ std::shared_ptr<Expression> Subtraction::eval(Environment& env) const
     }
     double result = num1->getNumber() - num2->getNumber();
     return std::make_shared<Number>(result);
+}
+
+std::string Subtraction::toString() const noexcept
+{
+    return leftExpression->toString() + " - " + rigthExpression->toString();
 }
 
 //Multiplication
@@ -186,6 +203,11 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Multiplication::toString() const noexcept
+{
+    return leftExpression->toString() + " * " + rigthExpression->toString();
+}
+
 //Division
 std::shared_ptr<Expression> Division::eval(Environment& env) const
 {
@@ -214,6 +236,11 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Division::toString() const noexcept
+{
+    return "(" + leftExpression->toString() + ")/(" + rigthExpression->toString() + ")";
+}
+
 //Power
 std::shared_ptr<Expression> Power::eval(Environment& env) const
 {
@@ -235,6 +262,11 @@ std::shared_ptr<Expression> Power::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Power::toString() const noexcept
+{
+    return leftExpression->toString() + " ^( " + rigthExpression->toString() + ")";
+}
+
 //NaturalLogarithm
 std::shared_ptr<Expression> NaturalLogarithm::eval(Environment& env) const
 {
@@ -251,6 +283,11 @@ std::shared_ptr<Expression> NaturalLogarithm::eval(Environment& env) const
     }
     double result = std::log(num1->getNumber());
     return std::make_shared<Number>(result);
+}
+
+std::string NaturalLogarithm::toString() const noexcept
+{
+    return "ln(" + expression->toString() + ")";
 }
 
 //Logarithm
@@ -274,6 +311,11 @@ std::shared_ptr<Expression> Logarithm::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Logarithm::toString() const noexcept
+{
+    return "lg" + leftExpression->toString() + "(" + rigthExpression->toString() + ")";
+}
+
 //Sine
 std::shared_ptr<Expression> Sine::eval(Environment& env) const
 {
@@ -290,6 +332,11 @@ std::shared_ptr<Expression> Sine::eval(Environment& env) const
     }
     double result = std::sin(num1->getNumber());
     return std::make_shared<Number>(result);
+}
+
+std::string Sine::toString() const noexcept
+{
+    return "Sin(" + expression->toString() + ")";
 }
 
 //Cosine
@@ -310,6 +357,11 @@ std::shared_ptr<Expression> Cosine::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Cosine::toString() const noexcept
+{
+    return "cos(" + expression->toString() + ")";
+}
+
 //Tangent
 std::shared_ptr<Expression> Tangent::eval(Environment& env) const
 {
@@ -326,6 +378,11 @@ std::shared_ptr<Expression> Tangent::eval(Environment& env) const
     }
     double result = std::tan(num1->getNumber());
     return std::make_shared<Number>(result);
+}
+
+std::string Tangent::toString() const noexcept
+{
+    return "Tag(" + expression->toString() + ")";
 }
 
 //Cotangent
@@ -346,6 +403,11 @@ std::shared_ptr<Expression> Cotangent::eval(Environment& env) const
     return std::make_shared<Number>(result);
 }
 
+std::string Cotangent::toString() const noexcept
+{
+    return "Ctg(" + expression->toString() + ")";
+}
+
 //Pair
 Pair::Pair(std::shared_ptr<Expression> _first, std::shared_ptr<Expression> _second) : Value(DataType::Pair), first{_first}, second{_second} {}
 
@@ -354,6 +416,11 @@ std::shared_ptr<Expression> Pair::eval(Environment& env) const
     auto exp1 = first->eval(env);
     auto exp2 = second->eval(env);
     return std::make_shared<Pair>(exp1, exp2);
+}
+
+std::string Pair::toString() const noexcept
+{
+    return "[" + first->toString() + ", " + second->toString() + "]";
 }
 
 std::shared_ptr<Expression> Pair::getFirst()
@@ -378,6 +445,11 @@ std::shared_ptr<Expression> PairFirst::eval(Environment& env) const
     return pair->getFirst()->eval(env);
 }
 
+std::string PairFirst::toString() const noexcept
+{
+    return "";
+}
+
 //PairSecond
 std::shared_ptr<Expression> PairSecond::eval(Environment& env) const
 {
@@ -388,6 +460,11 @@ std::shared_ptr<Expression> PairSecond::eval(Environment& env) const
         return nullptr;
     }
     return pair->getSecond()->eval(env);
+}
+
+std::string PairSecond::toString() const noexcept
+{
+    return "";
 }
 
 //Vector
@@ -405,6 +482,17 @@ std::shared_ptr<Expression> Vector::eval(Environment& env) const
         newVector.push_back(element);
     }
     return std::make_shared<Vector>(newVector);
+}
+std::string Vector::toString() const noexcept
+{
+    std::string result = "[ ";
+    for (auto exp : vectorExpression)
+    {
+        std::string element = exp->toString();
+        result += element;
+    }
+    result += "]";
+    return result;
 }
 
 std::vector<std::shared_ptr<Expression>> Vector::getVectorExpression() const
@@ -438,6 +526,20 @@ std::shared_ptr<Expression> Matrix::eval(Environment& env) const
         newMatrix.push_back(newVector);
     }
     return std::make_shared<Matrix>(newMatrix);
+}
+std::string Matrix::toString() const noexcept
+{
+    std::string result;
+    for (std::vector<std::shared_ptr<Expression>> vec : matrixExpression)
+    {
+        for (std::shared_ptr<Expression> exp : vec)
+        {
+            std::string element = exp->toString();
+            result += element;
+        }
+        result += "\n";
+    }
+    return result;
 }
 std::vector<std::vector<std::shared_ptr<Expression>>> Matrix::getMatrixExpression() const
 {
@@ -577,6 +679,11 @@ std::shared_ptr<Expression> InverseMatrix::eval(Environment& env) const
     return std::make_shared<Matrix>(gauss(mat));
 }
 
+std::string InverseMatrix::toString() const noexcept
+{
+    return "Matrix to Inverse:\n" + matrix->toString();
+}
+
 // LU Matrix
 MatrixLU::MatrixLU(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
 /*std::vector<std::vector<std::shared_ptr<Expression>>>*/
@@ -697,6 +804,101 @@ std::shared_ptr<Expression> MatrixLU::eval(Environment& env) const
     return std::make_shared<Pair>(std::make_shared<Matrix>(matrixPair.first), std::make_shared<Matrix>(matrixPair.second));
 }
 
+std::string MatrixLU::toString() const noexcept
+{
+    return "Matrix to lowerUpperDecomposition: \n"+ matrix->toString();
+}
+// Tridiagonal Matrix
+TridiagonalMatrix::TridiagonalMatrix(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
+std::vector<std::vector<std::shared_ptr<Expression>>> TridiagonalMatrix::tridiagonal(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
+{
+    size_t N = matrix.size() + 1;
+    std::vector<std::vector<double>> A(N, std::vector<double>(N)), T(N, std::vector<double>(N));
+    for (size_t i = 1; i < N; ++i)
+    {
+        for (size_t j = 1; j < N; ++j)
+        {
+            A[i][j] = std::dynamic_pointer_cast<Number>(matrix[i - 1][j - 1])->getNumber();
+        }
+    }
+
+    std::vector<double> U(N);
+    for (int IR = 1; IR <= N - 2; ++IR)
+    {
+        double S = 0;
+        for (int I = 1; I <= N; ++I)
+        {
+            U[I] = 0;
+            if (I > IR + 1) U[I] = A[I][IR];
+            if (I > IR) S += A[I][IR] * A[I][IR];
+        }
+        double W = 1;
+        if (A[IR + 1][IR] < 0) W = -1;
+        double SSR = sqrt(S);
+        double H = S + std::abs(A[IR + 1][IR]) * SSR;
+        U[IR + 1] = A[IR + 1][IR] + SSR * W;
+        double UAU = 0;
+        for (int I = 1; I <= N; ++I)
+        {
+            for (int J = 1; J <= N; ++J)
+            {
+                UAU += U[I] * A[I][J] * U[J];
+                if ((I <= IR) && (J <= IR))
+                {
+                    T[I][J] = A[I][J];
+                    continue;
+                }
+                if ((J == IR) && (I >= IR + 2))
+                {
+                    T[I][J] = 0;
+                    continue;
+                }
+                double B23 = 0;
+                for (int K = 1; K <= N; ++K)
+                {
+                    B23 -= (U[I] * A[K][J] + A[I][K] * U[J]) * U[K];
+                }
+                T[I][J] = A[I][J] + B23 / H;
+            }
+        }
+        UAU /= H * H;
+        for (int I = 1; I <= N; ++I)
+        {
+            for (int J = 1; J <= N; ++J)
+            {
+                A[I][J] = T[I][J] + UAU * U[I] * U[J];
+                if (std::abs(A[I][J]) < 0.000001) A[I][J] = 0;
+            }
+        }
+    }
+
+    std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+    for (size_t i = 1; i < N; ++i)
+    {
+        std::vector<std::shared_ptr<Expression>> newVector;
+        for (size_t j = 1; j < N; ++j)
+        {
+            newVector.push_back(std::make_shared<Number>(A[i][j]));
+        }
+        newMatrix.push_back(newVector);
+    }
+    return newMatrix;
+
+    //return std::make_shared<Matrix>(A);
+}
+
+std::shared_ptr<Expression> TridiagonalMatrix::eval(Environment& env) const
+{
+    auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
+    auto mat = evMatrix->getMatrixExpression();
+    return std::make_shared<Matrix>(tridiagonal(mat));
+}
+
+std::string TridiagonalMatrix::toString() const noexcept
+{
+    return "Matrix to make tridiagonal: \n"+ matrix->toString();
+}
+
 // Determinant
 Determinant::Determinant(std::shared_ptr<Matrix> _matrix) : Value(DataType::Number), matrix(_matrix) {}
 std::shared_ptr<Expression> Determinant::eval(Environment& env) const
@@ -711,7 +913,10 @@ std::shared_ptr<Expression> Determinant::eval(Environment& env) const
     }
     return std::make_shared<Number>(((det < 0) ? -det : det));
 }
-
+std::string Determinant::toString() const noexcept
+{
+    return "Matrix to calculate determinant: \n"+ matrix->toString();
+}
 //Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const
 {
@@ -723,16 +928,21 @@ std::shared_ptr<Expression> Equation::eval(Environment& env) const
     }
     return std::make_shared<Equation>(exp1, exp2);
 }
+std::string Equation::toString() const noexcept
+{
+    return leftExpression->toString() + " = " + rigthExpression->toString();
+}
 
 //Function
 std::shared_ptr<Expression> Function::eval(Environment& env) const
 {
     auto exp = expression->eval(env);
-    if (exp == nullptr)
-    {
-        return nullptr;
-    }
     return exp;
+}
+
+std::string Function::toString() const noexcept
+{
+    return expression->toString();
 }
 
 //Integral
@@ -797,27 +1007,14 @@ std::shared_ptr<Expression> Integral::eval(Environment& env) const
     double a = to->getNumber();
     double b = tf->getNumber();
     std::shared_ptr<Number> num = simpsonMethod(a, b, 100, function, env, variable);
-    if (num == nullptr)
-    {
-        return nullptr;
-    }
     return num;
 }
-
-//ODEInitialValues
-ODEInitialValues::ODEInitialValues(std::shared_ptr<Function> _function, std::shared_ptr<Pair> _values) : function(_function), values(_values) {}
-std::shared_ptr<Expression> ODEInitialValues::eval(Environment& env) const
+std::string Integral::toString() const noexcept
 {
-    auto inter = values->eval(env);
-    auto to = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairFirst>(inter)->eval(env));
-    auto tf = std::dynamic_pointer_cast<Number>(std::dynamic_pointer_cast<PairSecond>(inter)->eval(env));
-    if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
-    {
-        return nullptr;
-    }
-    return nullptr;
+    //std::string str = "Interval: " + interval->toString() + " Function: (" + function->toString() + ")d" + variable->toString();
+    std::string str = "Interval: " + interval->toString() + " | Integral = ∫(" + function->toString() + ")d" + variable->toString();
+    return str;
 }
-
 // Interpolate
 Interpolate::Interpolate(std::vector<std::shared_ptr<Expression>> _vectorExpression, std::shared_ptr<Number> _numInter) : Vector(_vectorExpression), numInter(_numInter) {}
 std::shared_ptr<Expression> Interpolate::eval(Environment& env) const
@@ -847,4 +1044,80 @@ std::shared_ptr<Expression> Interpolate::eval(Environment& env) const
         y_res += z * f[i];
     }
     return std::make_shared<Number>(y_res);
+}
+std::string Interpolate::toString() const noexcept
+{
+    //return vectorExpression->toString() + "Interpolate Number: " + numInter->toString();
+    return "";
+}
+
+ODEFirstOrder::ODEFirstOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable) : funct(_funct), initialValue(_initialValue), tFinal(_tFinal), variable(_variable) {}
+std::shared_ptr<Pair> ODEFirstOrder::rungekuttaMethod(double _t, double _x, double f, double h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const
+{
+    double t = _t, x = _x, tn = f;
+    while(t < tn)
+    {
+        env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x)));
+        auto num1 = std::dynamic_pointer_cast<Number>(function->eval(env));
+
+        if (num1 == nullptr)
+        {
+            return nullptr;
+        }
+        double k1 = h * num1->getNumber();
+
+        env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x + 0.5 * k1)));
+        auto num2 = std::dynamic_pointer_cast<Number>(function->eval(env));
+
+        if(num2 == nullptr)
+        {
+            return nullptr;
+        }
+
+        double k2 = h * num2->getNumber();
+
+        env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x + 0.5 * k2)));
+        auto num3 = std::dynamic_pointer_cast<Number>(function->eval(env));
+
+        if (num3 == nullptr)
+        {
+            return nullptr;
+        }
+        double k3 = h * num3->getNumber();
+
+        env.push_front(std::make_pair(variable->getVariable(), std::make_shared<Number>(x + k3)));
+        auto num4 = std::dynamic_pointer_cast<Number>(function->eval(env));
+
+        if (num4 == nullptr)
+        {
+            return nullptr;
+        }
+        double k4 = h * num4->getNumber();
+
+        x = x + (1.0/6.0)*(k1 + 2*k2 + 2*k3 + k4);
+        t = t + h;
+    }
+    return std::make_shared<Pair>(std::make_shared<Number>(t), std::make_shared<Number>(x));
+}
+std::shared_ptr<Expression> ODEFirstOrder::eval(Environment& env) const
+{
+    auto initialV = initialValue->eval(env);
+    auto to = std::dynamic_pointer_cast<Number>(PairFirst{initialValue}.eval(env));
+    auto xo = std::dynamic_pointer_cast<Number>(PairSecond{initialValue}.eval(env));
+    auto tEval = std::dynamic_pointer_cast<Number>(tFinal->eval(env));
+    if (to->getDataType() != DataType::Number || xo->getDataType() != DataType::Number || tEval->getDataType() != DataType::Number)
+    {
+        return nullptr;
+    }
+    double t = to->getNumber();
+    double x = xo->getNumber();
+    double f = tEval->getNumber();
+    double step = 0.1;
+    std::shared_ptr<Pair> num = rungekuttaMethod(t, x, f, step, funct, env, variable);
+
+    return num;
+}
+std::string ODEFirstOrder::toString() const noexcept
+{
+    return variable->toString() + "' = " + funct->toString() +"\n[t,"+ variable->toString()+"] = " + initialValue->toString() + "\nT_Final: " + tFinal->toString();
 }

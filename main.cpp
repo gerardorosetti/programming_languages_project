@@ -3,14 +3,17 @@
 int main()
 {
     Test::ValuesTest();
+    Test::ExpressionTest();
     Test::EnvTest();
     Test::AdditionTest();
     Test::InverseMatrixTest();
     Test::MatrixLUTest();
+    Test::TridiagonalMatrixTest();
     Test::DeterminantTest();
     Test::DivisionMatrixTest();
     Test::IntegralTest();
     Test::InterpolateTest();
+    Test::ODEFirstOrderTest();
     /*
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 

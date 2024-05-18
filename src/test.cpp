@@ -5,6 +5,8 @@ Print& print = Print::getInstance();
 
 void Test::ValuesTest()
 {
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
     print.execute(nullptr,"\nValues Test \n");
 
     std::shared_ptr<Expression> pair1 = std::make_shared<Pair>(std::make_shared<Number>(5), std::make_shared<Number>(10));
@@ -30,6 +32,35 @@ void Test::ValuesTest()
     std::shared_ptr<Expression> var1 = std::make_shared<Variable>('A');
 
     display.execute(var1);
+
+    std::shared_ptr<Expression> function = std::make_shared<Function>(std::make_shared<Addition>(std::make_shared<Number>(-5), std::make_shared<Number>(10)));
+    std::shared_ptr<Expression> sumFunct = std::make_shared<Addition>(function, std::make_shared<Number>(10))->eval(emptyEnv);
+    display.execute(sumFunct);
+    //std::shared_ptr<Expression> sub = std::make_shared<Subtraction>(num1, var1);
+    //std::shared_ptr<Expression> mult = std::make_shared<Multiplication>(num1, var1);
+    //std::shared_ptr<Expression> div = std::make_shared<Division>(num1, var1);
+}
+
+void Test::ExpressionTest()
+{
+    print.execute(nullptr,"\nExpressions Test\n");
+    std::shared_ptr<Expression> num1 = std::make_shared<Number>(2);
+    std::shared_ptr<Expression> var = std::make_shared<Sine>(std::make_shared<Variable>('A'));
+    std::shared_ptr<Expression> sum = std::make_shared<Addition>(num1,var);
+
+    display.execute(sum);
+
+    std::shared_ptr<Expression> to = std::make_shared<Number>(0);
+    std::shared_ptr<Expression> tf = std::make_shared<Number>(10);
+
+    std::shared_ptr<Expression> interval = std::make_shared<Pair>(to, tf);
+
+    std::shared_ptr<Expression> letter = std::make_shared<Variable>('x');
+    std::shared_ptr<Expression> sum1 = std::make_shared<Addition>(letter, std::make_shared<Number>(2));
+
+    std::shared_ptr<Expression> integral = std::make_shared<Integral>(std::make_shared<Pair>(to,tf), std::make_shared<Function>(sum1),  std::dynamic_pointer_cast<Variable>(letter));
+
+    display.execute(integral);
 }
 
 void Test::EnvTest()
@@ -90,8 +121,6 @@ void Test::MatrixLUTest()
 
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
-    //{{2, 1, -3}, {-1, 3, 2}, {3, 1, -3}};
-
     std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
     std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
     std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
@@ -100,12 +129,24 @@ void Test::MatrixLUTest()
 
     std::shared_ptr<Expression> matrixPair = std::make_shared<MatrixLU>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
 
-    //std::shared_ptr<Expression> lowerMatrix = std::make_shared<PairFirst>(matrixPair);
-    //std::shared_ptr<Expression> upperMatrix = std::make_shared<PairSecond>(matrixPair);
-
     display.execute(matrixPair);
-    //display.execute(m1);
-    //display.execute(m1inv, "Matrix LU");
+}
+
+void Test::TridiagonalMatrixTest()
+{
+    print.execute(nullptr, "\nTridiagonal Matrix Test\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+
+    std::shared_ptr<Expression> trid = std::make_shared<TridiagonalMatrix>(std::dynamic_pointer_cast<Matrix>(m1));//->eval(emptyEnv);
+
+    display.execute(trid);
 }
 
 void Test::DeterminantTest()
@@ -161,6 +202,7 @@ void Test::IntegralTest()
 
     std::shared_ptr<Expression> integral = std::make_shared<Integral>(std::make_shared<Pair>(to,tf), std::make_shared<Function>(sum),  std::dynamic_pointer_cast<Variable>(letter));
 
+    display.execute(integral);
     print.execute(nullptr, "Integral Value : ");
 
     std::shared_ptr<Expression> result = integral->eval(emptyEnv);
@@ -190,6 +232,37 @@ void Test::InterpolateTest()
 
     print.execute(nullptr, "Interpolate Value : ");
     std::shared_ptr<Expression> result = interpolate->eval(emptyEnv);
+
+    display.execute(result);
+}
+
+void Test::ODEFirstOrderTest()
+{
+    print.execute(nullptr, "\nODE First Order Test\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::shared_ptr<Expression> to = std::make_shared<Number>(0);
+    std::shared_ptr<Expression> xo = std::make_shared<Number>(0);
+
+    std::shared_ptr<Expression> num1 = std::make_shared<Number>(-3);
+    std::shared_ptr<Expression> num2 = std::make_shared<Number>(125);
+    std::shared_ptr<Expression> var = std::make_shared<Variable>('x');
+
+    std::shared_ptr<Expression> div = std::make_shared<Division>(num1,num2);
+    std::shared_ptr<Expression> mult = std::make_shared<Multiplication>(div,var);
+    
+    std::shared_ptr<Expression> num3 = std::make_shared<Number>(0.6);
+    std::shared_ptr<Expression> sum = std::make_shared<Addition>(mult, num3);
+
+    std::shared_ptr<Expression> tFinal = std::make_shared<Number>(30);
+    
+    std::shared_ptr<Expression> ODE = std::make_shared<ODEFirstOrder>(std::make_shared<Function>(sum), std::make_shared<Pair>(to,xo), std::dynamic_pointer_cast<Number>(tFinal), std::dynamic_pointer_cast<Variable>(var));
+
+    display.execute(ODE);
+    print.execute(nullptr, "ODE Value : ");
+
+    std::shared_ptr<Expression> result = ODE->eval(emptyEnv);
 
     display.execute(result);
 }

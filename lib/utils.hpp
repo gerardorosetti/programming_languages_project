@@ -8,6 +8,7 @@
 #include <functional>
 #include <limits>
 #include <iomanip>
+#include <string>
 
 enum class DataType
 {
