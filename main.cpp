@@ -7,6 +7,7 @@ int main()
     Test::AdditionTest();
     Test::InverseMatrixTest();
     Test::MatrixLUTest();
+    Test::DeterminantTest();
     Test::DivisionMatrixTest();
     Test::IntegralTest();
     Test::InterpolateTest();

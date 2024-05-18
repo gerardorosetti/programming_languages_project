@@ -108,6 +108,20 @@ void Test::MatrixLUTest()
     //display.execute(m1inv, "Matrix LU");
 }
 
+void Test::DeterminantTest()
+{
+    print.execute(nullptr, "\nMatrix Determinant Test\n");
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::shared_ptr<Expression>> vecMat2 = {std::make_shared<Number>(-1), std::make_shared<Number>(3), std::make_shared<Number>(2)};
+    std::vector<std::shared_ptr<Expression>> vecMat3 = {std::make_shared<Number>(3), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma1 = {vecMat1, vecMat2, vecMat3};
+    std::shared_ptr<Expression> m1 = std::make_shared<Matrix>(ma1);
+    std::shared_ptr<Expression> det = std::make_shared<Determinant>(std::dynamic_pointer_cast<Matrix>(m1))->eval(emptyEnv);
+    display.execute(det);
+}
+
 void Test::DivisionMatrixTest()
 {
     print.execute(nullptr, "\nMatrix Division Test\n");

@@ -701,8 +701,8 @@ std::shared_ptr<Expression> MatrixLU::eval(Environment& env) const
 Determinant::Determinant(std::shared_ptr<Matrix> _matrix) : Value(DataType::Number), matrix(_matrix) {}
 std::shared_ptr<Expression> Determinant::eval(Environment& env) const
 {
-    auto matrixPair = std::make_shared<MatrixLU>(matrix)->eval(env);
-    auto upperMatrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<PairSecond>(matrixPair));
+    auto matrixPair = std::make_shared<MatrixLU>(matrix);
+    auto upperMatrix = std::dynamic_pointer_cast<Matrix>(std::make_shared<PairSecond>(matrixPair)->eval(env));
     auto U = upperMatrix->getMatrixExpression();
     double det = 1;
     for (int I = 0; I < U.size(); ++I)
