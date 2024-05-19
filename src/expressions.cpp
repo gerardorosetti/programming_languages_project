@@ -1294,8 +1294,8 @@ std::string Interpolate::toString() const noexcept
     return result;
 }
 
-ODEFirstOrder::ODEFirstOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable) : funct(_funct), initialValue(_initialValue), tFinal(_tFinal), variable(_variable) {}
-std::shared_ptr<Pair> ODEFirstOrder::rungekuttaMethod(double _t, double _x, double f, double h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const
+ODEFirstOrderInitialValues::ODEFirstOrderInitialValues(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable) : funct(_funct), initialValue(_initialValue), tFinal(_tFinal), variable(_variable) {}
+std::shared_ptr<Pair> ODEFirstOrderInitialValues::rungekuttaMethod(double _t, double _x, double f, double h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const
 {
     double t = _t, x = _x, tn = f;
     while(t < tn)
@@ -1342,7 +1342,7 @@ std::shared_ptr<Pair> ODEFirstOrder::rungekuttaMethod(double _t, double _x, doub
     }
     return std::make_shared<Pair>(std::make_shared<Number>(t), std::make_shared<Number>(x));
 }
-std::shared_ptr<Expression> ODEFirstOrder::eval(Environment& env) const
+std::shared_ptr<Expression> ODEFirstOrderInitialValues::eval(Environment& env) const
 {
     auto initialV = initialValue->eval(env);
     auto to = std::dynamic_pointer_cast<Number>(PairFirst{initialValue}.eval(env));
@@ -1365,7 +1365,7 @@ std::shared_ptr<Expression> ODEFirstOrder::eval(Environment& env) const
 
     return num;
 }
-std::string ODEFirstOrder::toString() const noexcept
+std::string ODEFirstOrderInitialValues::toString() const noexcept
 {
     return variable->toString() + "' = " + funct->toString() +"\n[t,"+ variable->toString()+"] = " + initialValue->toString() + "\nT_Final: " + tFinal->toString();
 }

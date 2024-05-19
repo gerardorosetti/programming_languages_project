@@ -25,6 +25,6 @@ public:
     static void DivisionMatrixTest();
     static void IntegralTest();
     static void InterpolateTest();
-    static void ODEFirstOrderTest();
+    static void ODEFirstOrderInitialValuesTest();
     static void FindRootBisectionTest();
 };

@@ -314,7 +314,7 @@ public:
     std::string toString() const noexcept override;
 };
 
-class ODEFirstOrder : public Expression
+class ODEFirstOrderInitialValues : public Expression
 {
 private:
     std::shared_ptr<Function> funct;
@@ -323,7 +323,7 @@ private:
     std::shared_ptr<Variable> variable;
     std::shared_ptr<Pair> rungekuttaMethod(double t, double x, double f, double h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const;
 public:
-    ODEFirstOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable);
+    ODEFirstOrderInitialValues(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable);
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::string toString() const noexcept override;
 };

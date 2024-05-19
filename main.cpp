@@ -20,7 +20,7 @@ int main()
     Test::DivisionMatrixTest();
     Test::IntegralTest();
     Test::InterpolateTest();
-    Test::ODEFirstOrderTest();
+    Test::ODEFirstOrderInitialValuesTest();
     Test::FindRootBisectionTest();
     return 0;
 }

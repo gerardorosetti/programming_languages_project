@@ -85,7 +85,7 @@ void Test::ExpressionTest()
 
     std::shared_ptr<Expression> tFinal = std::make_shared<Number>(30);
 
-    std::shared_ptr<Expression> ODE = std::make_shared<ODEFirstOrder>(std::make_shared<Function>(sum3), std::make_shared<Pair>(to,xo), std::dynamic_pointer_cast<Number>(tFinal), std::dynamic_pointer_cast<Variable>(letter));
+    std::shared_ptr<Expression> ODE = std::make_shared<ODEFirstOrderInitialValues>(std::make_shared<Function>(sum3), std::make_shared<Pair>(to,xo), std::dynamic_pointer_cast<Number>(tFinal), std::dynamic_pointer_cast<Variable>(letter));
 
     print.execute(nullptr, "\nOrdinary Differential Equation First Order, with initial values:\n");
     display.execute(ODE);
@@ -478,7 +478,7 @@ void Test::InterpolateTest()
     display.execute(interpolate->eval(emptyEnv));
 }
 
-void Test::ODEFirstOrderTest()
+void Test::ODEFirstOrderInitialValuesTest()
 {
     print.execute(nullptr, "\n\nORDINARY DIFFERENTIAL EQUATION FIRST ORDER INITIAL VALUES TEST\n");
 
@@ -499,7 +499,7 @@ void Test::ODEFirstOrderTest()
 
     std::shared_ptr<Expression> tFinal = std::make_shared<Number>(30);
 
-    std::shared_ptr<Expression> ODE1 = std::make_shared<ODEFirstOrder>(std::make_shared<Function>(sum), std::make_shared<Pair>(to,xo), std::dynamic_pointer_cast<Number>(tFinal), std::dynamic_pointer_cast<Variable>(var));
+    std::shared_ptr<Expression> ODE1 = std::make_shared<ODEFirstOrderInitialValues>(std::make_shared<Function>(sum), std::make_shared<Pair>(to,xo), std::dynamic_pointer_cast<Number>(tFinal), std::dynamic_pointer_cast<Variable>(var));
 
     print.execute(nullptr, "Expression1: \n");
     display.execute(ODE1);
@@ -507,7 +507,7 @@ void Test::ODEFirstOrderTest()
     print.execute(nullptr, "Eval1: \n");
     display.execute(ODE1->eval(emptyEnv));
 
-    std::shared_ptr<Expression> ODE2 = std::make_shared<ODEFirstOrder>(std::make_shared<Function>(sum), std::make_shared<Pair>(to,xo), std::make_shared<Number>(-10), std::dynamic_pointer_cast<Variable>(var));
+    std::shared_ptr<Expression> ODE2 = std::make_shared<ODEFirstOrderInitialValues>(std::make_shared<Function>(sum), std::make_shared<Pair>(to,xo), std::make_shared<Number>(-10), std::dynamic_pointer_cast<Variable>(var));
 
     print.execute(nullptr, "\nExpression2: \n");
     display.execute(ODE2);
