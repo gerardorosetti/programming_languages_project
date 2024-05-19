@@ -56,6 +56,22 @@ public:
     double getNumber() const;
 };
 
+class PI : public Value
+{
+public:
+    PI();
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::string toString() const noexcept override;
+};
+
+class EULER : public Value
+{
+public:
+    EULER();
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::string toString() const noexcept override;
+};
+
 class Variable : public Value
 {
 protected:
@@ -209,7 +225,8 @@ class InverseMatrix : public Value
 {
 private:
     std::shared_ptr<Matrix> matrix;
-    std::vector<std::vector<std::shared_ptr<Expression>>> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+    //std::vector<std::vector<std::shared_ptr<Expression>>> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+    std::shared_ptr<Expression> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
 public:
     InverseMatrix(std::shared_ptr<Matrix> _matrix);
     std::shared_ptr<Expression> eval(Environment& env) const override;

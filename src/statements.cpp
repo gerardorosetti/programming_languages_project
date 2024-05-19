@@ -7,7 +7,14 @@ Display& Display::getInstance()
 }
 void Display::execute(std::shared_ptr<Expression> exp, std::string name) const
 {
-    std::cout << exp->toString() << std::endl;
+    if(exp == nullptr)
+    {
+        std::cout << "NULLPTR" << std::endl;
+    }
+    else
+    {
+        std::cout << exp->toString() << std::endl;
+    }
 }
 
 Print& Print::getInstance()

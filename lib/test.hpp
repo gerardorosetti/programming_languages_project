@@ -26,4 +26,5 @@ public:
     static void IntegralTest();
     static void InterpolateTest();
     static void ODEFirstOrderTest();
+    static void FindRootBisectionTest();
 };

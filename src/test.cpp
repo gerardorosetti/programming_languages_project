@@ -40,6 +40,8 @@ void Test::ValuesTest()
 
 void Test::ExpressionTest()
 {
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
     print.execute(nullptr,"\n\nEXPRESSIONS TEST\n");
     std::shared_ptr<Expression> num1 = std::make_shared<Number>(2);
     std::shared_ptr<Expression> var = std::make_shared<Variable>('A');
@@ -57,7 +59,7 @@ void Test::ExpressionTest()
     std::shared_ptr<Expression> func2 = std::make_shared<Function>(sum1);
 
     print.execute(nullptr,"\nPower, Trigonometrics, ln: ");
-    display.execute(func2);
+    display.execute(func2->eval(emptyEnv));
 
     std::shared_ptr<Expression> eq = std::make_shared<Equation>(func,func2);
 
@@ -237,6 +239,15 @@ void Test::MultiplicationMatrixTest()
 
     print.execute(nullptr,"Eval2: \n");
     display.execute(mul2->eval(emptyEnv));
+
+
+    std::shared_ptr<Expression> mul3 = std::make_shared<Multiplication>(std::make_shared<Number>(10),m3);
+
+    print.execute(nullptr,"\nExpression3: \n");
+    display.execute(mul3);
+
+    print.execute(nullptr,"Eval3: \n");
+    display.execute(mul3->eval(emptyEnv));
 }
 
 void Test::DivisionTest()
@@ -408,6 +419,14 @@ void Test::DivisionMatrixTest()
 
     print.execute(nullptr,"Eval2: \n");
     display.execute(m3->eval(emptyEnv));
+
+    std::shared_ptr<Expression> m4 = std::make_shared<Division>(m1, std::make_shared<Number>(10));
+
+    print.execute(nullptr,"\nExpression3: \n");
+    display.execute(m4);
+
+    print.execute(nullptr,"Eval3: \n");
+    display.execute(m4->eval(emptyEnv));
 }
 
 void Test::IntegralTest()
@@ -497,3 +516,33 @@ void Test::ODEFirstOrderTest()
     display.execute(ODE2->eval(emptyEnv));
 
 }
+
+void Test::FindRootBisectionTest()
+{
+    print.execute(nullptr, "\n\nFIND ROOT USING BISECTION TEST\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::shared_ptr<Expression> to = std::make_shared<Number>(0);
+    std::shared_ptr<Expression> tf = std::make_shared<Number>(1);
+
+    std::shared_ptr<Expression> interval = std::make_shared<Pair>(to, tf);
+
+    std::shared_ptr<Expression> letter = std::make_shared<Variable>('x');
+
+    std::shared_ptr<Expression> part1 = std::make_shared<Multiplication>(std::make_shared<Number>(0.1), std::make_shared<Power>(letter, std::make_shared<Number>(3)));
+    std::shared_ptr<Expression> part2 = std::make_shared<Multiplication>(std::make_shared<Number>(-5), std::make_shared<Power>(letter, std::make_shared<Number>(2)));
+    std::shared_ptr<Expression> part3 = std::make_shared<Addition>(std::make_shared<Multiplication>(std::make_shared<Number>(-1), letter), std::make_shared<Number>(04));
+
+    std::shared_ptr<Expression> part4 = std::make_shared<Addition>(part3, std::make_shared<Power>(std::make_shared<EULER>(), std::make_shared<Multiplication>(std::make_shared<Number>(-1), letter)));
+
+    std::shared_ptr<Expression> sum = std::make_shared<Addition>(part1, std::make_shared<Addition>(part2, part4));
+    std::shared_ptr<Expression> finalExp = std::make_shared<Function>(sum);
+
+    std::shared_ptr<Expression> bisection = std::make_shared<FindRootBisection>(std::dynamic_pointer_cast<Pair>(interval), std::dynamic_pointer_cast<Function>(finalExp), std::dynamic_pointer_cast<Variable>(letter));
+
+    print.execute(nullptr, "Expression: \n");
+    display.execute(bisection);
+    print.execute(nullptr, "Eval: \n");
+    display.execute(bisection->eval(emptyEnv));
+};

@@ -21,5 +21,6 @@ int main()
     Test::IntegralTest();
     Test::InterpolateTest();
     Test::ODEFirstOrderTest();
+    Test::FindRootBisectionTest();
     return 0;
 }
