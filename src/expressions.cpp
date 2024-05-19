@@ -1384,16 +1384,11 @@ std::shared_ptr<Number> FindRootBisection::bisectionMethod(std::shared_ptr<Numbe
     double yc = std::dynamic_pointer_cast<Number>(evFunction->eval(env))->getNumber();
     int it = 0;
 
-    while (true)
+    while (++it <= il)
     {
         double b = (a + c) / 2;
         env.push_front(std::make_pair(var, std::make_shared<Number>(b)));
         double yb = std::dynamic_pointer_cast<Number>(evFunction->eval(env))->getNumber();
-
-        if (++it > il)
-        {
-            break;
-        }
         if (std::abs(b - a) < ep)
         {
             break;
@@ -1435,4 +1430,3 @@ std::string FindRootBisection::toString() const noexcept
 {
     return "Interval: " + interval->toString() + " | Function: " + function->toString();
 }
-
