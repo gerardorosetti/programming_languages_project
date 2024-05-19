@@ -13,6 +13,17 @@ UnaryExpression::UnaryExpression(std::shared_ptr<Expression> _expression) : expr
 // Binary Expression
 BinaryExpression::BinaryExpression(std::shared_ptr<Expression> _leftExpression, std::shared_ptr<Expression> _rigthExpression) : leftExpression(_leftExpression), rigthExpression(_rigthExpression) {}
 
+//Impossible
+Impossible::Impossible() : Value(DataType::Impossible) {}
+
+std::shared_ptr<Expression> Impossible::eval(Environment& env) const
+{
+    return std::shared_ptr<Impossible>();
+}
+std::string Impossible::toString() const noexcept
+{
+    return value;
+}
 // Number
 Number::Number(double _number) : Value(DataType::Number), number{_number} {}
 std::shared_ptr<Expression> Number::eval(Environment& env) const
@@ -71,15 +82,17 @@ std::shared_ptr<Expression> Addition::eval(Environment& env) const
         auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
         auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
         if (matrix1.size() != matrix2.size())
-        {
-            return nullptr;
+        {                
+            std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+            return imp;
         }
         std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
         for (size_t i = 0; i < matrix1.size(); ++i)
         {
             if (matrix1[i].size() != matrix2[i].size())
             {
-                return nullptr;
+                std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+                return imp;
             }
             std::vector<std::shared_ptr<Expression>> newVec;
             for (size_t j = 0; j < matrix1[i].size(); ++j)
@@ -120,15 +133,17 @@ std::shared_ptr<Expression> Subtraction::eval(Environment& env) const
         auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
         auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
         if (matrix1.size() != matrix2.size())
-        {
-            return nullptr;
+        {        
+            std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+            return imp;
         }
         std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
         for (size_t i = 0; i < matrix1.size(); ++i)
         {
             if (matrix1[i].size() != matrix2[i].size())
             {
-                return nullptr;
+                std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+                return imp;
             }
             std::vector<std::shared_ptr<Expression>> newVec;
             for (size_t j = 0; j < matrix1[i].size(); ++j)
@@ -171,19 +186,21 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
         auto matrix1 = std::dynamic_pointer_cast<Matrix>(element1)->getMatrixExpression();
         auto matrix2 = std::dynamic_pointer_cast<Matrix>(element2)->getMatrixExpression();
         std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
+        if (matrix1[0].size() != matrix2.size())
+        {
+            std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+            return imp;
+        }
         for (size_t i = 0; i < matrix1.size(); ++i)
         {
-            if (matrix1.size() != matrix2[i].size())
-            {
-                return nullptr;
-            }
             std::vector<std::shared_ptr<Expression>> newVec;
-            for (size_t j = 0; j < matrix2[i].size(); ++j)
+            for (size_t j = 0; j < matrix2[0].size(); ++j)
             {
                 std::shared_ptr<Expression> acc = std::make_shared<Number>(0.0);
-                for (size_t k1 = 0, k2 = 0; k1 < matrix2[i].size(); ++k1, ++k2)
+                for (size_t k = 0; k < matrix1[i].size(); ++k)
                 {
-                    acc = std::make_shared<Addition>(acc, std::make_shared<Multiplication>(matrix1[i][k1], matrix2[k2][j]));
+                    auto mul = std::make_shared<Multiplication>(matrix1[i][k], matrix2[k][j]);
+                    acc = std::make_shared<Addition>(acc, mul);
                 }
                 newVec.push_back(acc);
             }
@@ -205,7 +222,7 @@ std::shared_ptr<Expression> Multiplication::eval(Environment& env) const
 
 std::string Multiplication::toString() const noexcept
 {
-    return leftExpression->toString() + " * " + rigthExpression->toString();
+    return "("+ leftExpression->toString()+ ") * (" + rigthExpression->toString() +")";
 }
 
 //Division
@@ -250,7 +267,7 @@ std::shared_ptr<Expression> Power::eval(Environment& env) const
     auto element2 = std::dynamic_pointer_cast<Value>(exp2);
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
-        return std::make_shared<Addition>(exp1, exp2);
+        return std::make_shared<Power>(exp1, exp2);
     }
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);
@@ -264,7 +281,7 @@ std::shared_ptr<Expression> Power::eval(Environment& env) const
 
 std::string Power::toString() const noexcept
 {
-    return leftExpression->toString() + " ^( " + rigthExpression->toString() + ")";
+    return "("+ leftExpression->toString() + ")^(" + rigthExpression->toString() + ")";
 }
 
 //NaturalLogarithm
@@ -299,7 +316,7 @@ std::shared_ptr<Expression> Logarithm::eval(Environment& env) const
     auto element2 = std::dynamic_pointer_cast<Value>(exp2);
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
-        return std::make_shared<Addition>(exp1, exp2);
+        return std::make_shared<Logarithm>(exp1, exp2);
     }
     auto num1 = std::dynamic_pointer_cast<Number>(exp1);
     auto num2 = std::dynamic_pointer_cast<Number>(exp2);
@@ -485,11 +502,11 @@ std::shared_ptr<Expression> Vector::eval(Environment& env) const
 }
 std::string Vector::toString() const noexcept
 {
-    std::string result = "[ ";
+    std::string result = "[  ";
     for (auto exp : vectorExpression)
     {
         std::string element = exp->toString();
-        result += element;
+        result += element +"  ";
     }
     result += "]";
     return result;
@@ -519,9 +536,12 @@ std::shared_ptr<Expression> Matrix::eval(Environment& env) const
             auto num = std::dynamic_pointer_cast<Number>(element);
             if (num == nullptr)
             {
-                return nullptr;
+                newVector.push_back(element);
             }
-            newVector.push_back(num);
+            else
+            {
+                newVector.push_back(num);
+            }
         }
         newMatrix.push_back(newVector);
     }
@@ -535,7 +555,7 @@ std::string Matrix::toString() const noexcept
         for (std::shared_ptr<Expression> exp : vec)
         {
             std::string element = exp->toString();
-            result += element;
+            result += element +" ";
         }
         result += "\n";
     }
@@ -806,7 +826,7 @@ std::shared_ptr<Expression> MatrixLU::eval(Environment& env) const
 
 std::string MatrixLU::toString() const noexcept
 {
-    return "Matrix to lowerUpperDecomposition: \n"+ matrix->toString();
+    return "Matrix to lower Upper Decomposition: \n"+ matrix->toString();
 }
 // Tridiagonal Matrix
 TridiagonalMatrix::TridiagonalMatrix(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
@@ -899,6 +919,165 @@ std::string TridiagonalMatrix::toString() const noexcept
     return "Matrix to make tridiagonal: \n"+ matrix->toString();
 }
 
+// Eigenvalues
+RealEigenvalues::RealEigenvalues(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
+void RealEigenvalues::determ(std::vector<double> G, std::vector<std::vector<double>> A, double X, double &SL, size_t L) const
+{
+    G[0] = 1;
+    if (L == 1) return;
+    G[1] = A[1][1] - X;
+    if (L == 1) return;
+    for (int K = 2; K <= L; K++)
+    {
+        G[K] = (A[K][K] - X) * G[K - 1] - A[K][K - 1] * A[K][K - 1] * G[K - 2];
+    }
+    SL = G[L];
+}
+void RealEigenvalues::bisec(std::vector<double> G, std::vector<std::vector<double>> A, double XL, double XH, double &XM, size_t L) const
+{
+    int KA = 0;
+    double YL, YH, DX, XB, YM;
+    determ(G, A, XL, YL, L);
+    determ(G, A, XH, YH, L);
+    while (true)
+    {
+        KA++;
+        if (KA > 99) return;
+        DX = XH - XL;
+        if (DX < 0.0000001) return;
+        if (DX > 1)
+        {
+            XM = (XL + XH) / 2;
+            determ(G, A, XM, YM, L);
+            if (YL * YM < 0)
+            {
+                XH = XM;
+                YH = YM;
+                continue;
+            }
+            XL = XM;
+            YL = YM;
+            continue;
+        }
+        XB = XM;
+        XM = (XL * YH - XH * YL) / (YH - YL);
+        determ(G, A, XM, YM, L);
+        if (std::abs(XB - XM) < 0.000001) return;
+        if (YL * YM < 0)
+        {
+            XH = XM;
+            YH = YM;
+            continue;
+        }
+        XL = XM;
+        YL = YM;
+    }
+}
+std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
+{
+    size_t N = matrix.size();
+
+    std::vector<std::vector<double>> A(N + 1, std::vector<double>(N + 1)), T(N + 1, std::vector<double>(N + 1)), EI(N + 1, std::vector<double>(N + 1));
+    for (size_t i = 1; i <= N; ++i)
+    {
+        for (size_t j = 1; j <= N; ++j)
+        {
+            A[i][j] = std::dynamic_pointer_cast<Number>(matrix[i - 1][j - 1])->getNumber();
+        }
+    }
+
+    std::vector<double> U(N + 1);
+    for (int IR = 1; IR <= N - 2; ++IR)
+    {
+        double S = 0;
+        for (int I = 1; I <= N; ++I)
+        {
+            U[I] = 0;
+            if (I > IR + 1) U[I] = A[I][IR];
+            if (I > IR) S += A[I][IR] * A[I][IR];
+        }
+        double W = 1;
+        if (A[IR + 1][IR] < 0) W = -1;
+        double SSR = sqrt(S);
+        double H = S + std::abs(A[IR + 1][IR]) * SSR;
+        U[IR + 1] = A[IR + 1][IR] + SSR * W;
+        double UAU = 0;
+        for (int I = 1; I <= N; ++I)
+        {
+            for (int J = 1; J <= N; ++J)
+            {
+                UAU += U[I] * A[I][J] * U[J];
+                if ((I <= IR) && (J <= IR))
+                {
+                    T[I][J] = A[I][J];
+                    continue;
+                }
+                if ((J == IR) && (I >= IR + 2))
+                {
+                    T[I][J] = 0;
+                    continue;
+                }
+                double B23 = 0;
+                for (int K = 1; K <= N; ++K)
+                {
+                    B23 -= (U[I] * A[K][J] + A[I][K] * U[J]) * U[K];
+                }
+                T[I][J] = A[I][J] + B23 / H;
+            }
+        }
+        UAU /= H * H;
+        for (int I = 1; I <= N; ++I)
+        {
+            for (int J = 1; J <= N; ++J)
+            {
+                A[I][J] = T[I][J] + UAU * U[I] * U[J];
+                if (std::abs(A[I][J]) < 0.000001) A[I][J] = 0;
+            }
+        }
+    }
+
+    int KM = N;
+
+    for (size_t L = 1; L <= KM; ++L)
+    {
+        if (L == 1)
+        {
+            EI[1][1] = A[1][1];
+        }
+        else
+        {
+            for (int J = 1; J <= L; ++J)
+            {
+                double XL = EI[L - 1][J - 1];
+                double XH = EI[L - 1][J];
+                double XM;
+                bisec(U, A, XL, XH, XM, L);
+                EI[L][J] = XM;
+            }
+        }
+        if (L < KM)
+        {
+            EI[L][0] = -99;
+            EI[L][L + 1] = 99;
+        }
+    }
+    std::vector<std::shared_ptr<Expression>> newVector{};
+    for (size_t i = 1; i <= N; ++i)
+    {
+        newVector.push_back(std::make_shared<Number>(EI[N][i]));
+    }
+    return newVector;
+}
+std::shared_ptr<Expression> RealEigenvalues::eval(Environment& env) const
+{
+    auto evMatrix = matrix->eval(env);
+    auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(evMatrix)->getMatrixExpression());
+    return std::make_shared<Vector>(values);
+}
+std::string RealEigenvalues::toString() const noexcept
+{
+    return "Matrix to calculate eigenvalues: \n"+ matrix->toString();
+}
 // Determinant
 Determinant::Determinant(std::shared_ptr<Matrix> _matrix) : Value(DataType::Number), matrix(_matrix) {}
 std::shared_ptr<Expression> Determinant::eval(Environment& env) const
@@ -1011,7 +1190,6 @@ std::shared_ptr<Expression> Integral::eval(Environment& env) const
 }
 std::string Integral::toString() const noexcept
 {
-    //std::string str = "Interval: " + interval->toString() + " Function: (" + function->toString() + ")d" + variable->toString();
     std::string str = "Interval: " + interval->toString() + " | Integral = ∫(" + function->toString() + ")d" + variable->toString();
     return str;
 }
@@ -1047,8 +1225,15 @@ std::shared_ptr<Expression> Interpolate::eval(Environment& env) const
 }
 std::string Interpolate::toString() const noexcept
 {
-    //return vectorExpression->toString() + "Interpolate Number: " + numInter->toString();
-    return "";
+    std::string result = "[  ";
+    for (auto exp : vectorExpression)
+    {
+        std::string element = exp->toString();
+        result += element +"  ";
+    }
+    result += "]\nInterpolate Number: " +numInter->toString();
+
+    return result;
 }
 
 ODEFirstOrder::ODEFirstOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable) : funct(_funct), initialValue(_initialValue), tFinal(_tFinal), variable(_variable) {}
@@ -1113,6 +1298,11 @@ std::shared_ptr<Expression> ODEFirstOrder::eval(Environment& env) const
     double x = xo->getNumber();
     double f = tEval->getNumber();
     double step = 0.1;
+    if (f < t)
+    {
+        std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+        return imp;
+    }
     std::shared_ptr<Pair> num = rungekuttaMethod(t, x, f, step, funct, env, variable);
 
     return num;
@@ -1121,3 +1311,68 @@ std::string ODEFirstOrder::toString() const noexcept
 {
     return variable->toString() + "' = " + funct->toString() +"\n[t,"+ variable->toString()+"] = " + initialValue->toString() + "\nT_Final: " + tFinal->toString();
 }
+
+FindRootBisection::FindRootBisection(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function, std::shared_ptr<Variable> _variable, std::shared_ptr<Number> _iterationLimit) : interval(_interval), function(_function), variable(_variable), iterationLimit(_iterationLimit) {}
+std::shared_ptr<Number> FindRootBisection::bisectionMethod(std::shared_ptr<Number> left, std::shared_ptr<Number> right, std::shared_ptr<Function> evFunction, Environment& env) const
+{
+    double a = left->getNumber(), c = right->getNumber(), ep = 0.0001;
+    size_t il = iterationLimit->getNumber();
+
+    char var = variable->getVariable();
+
+    env.push_front(std::make_pair(var, left));
+    double ya = std::dynamic_pointer_cast<Number>(evFunction->eval(env))->getNumber();
+    env.push_front(std::make_pair(var, right));
+    double yc = std::dynamic_pointer_cast<Number>(evFunction->eval(env))->getNumber();
+    int it = 0;
+
+    while (true)
+    {
+        it++;
+        double b = (a + c) / 2;
+        env.push_front(std::make_pair(var, std::make_shared<Number>(b)));
+        double yb = std::dynamic_pointer_cast<Number>(evFunction->eval(env))->getNumber();
+
+        if (it > il)
+        {
+            //std::cout << "Se ha Excedido el Limite de Iteraciones" << std::endl;
+            break;
+        }
+        if (std::abs(b - a) < ep)
+        {
+            //std::cout << "Se ha Satisfecho la Tolerancia" << std::endl;
+            break;
+        }
+        if (ya * yb <= 0)
+        {
+            c = b;
+            yc = yb;
+        }
+        else
+        {
+            a = b;
+            ya = yb;
+        }
+    }
+
+    //std::cout << "Resultado Final: Raiz Aproximada = " << (a + c) / 2 << std::endl;
+
+    return std::make_shared<Number>((a + c) / 2);
+}
+std::shared_ptr<Expression> FindRootBisection::eval(Environment& env) const
+{
+    auto evInterval = std::dynamic_pointer_cast<Pair>(interval->eval(env));
+    auto left = std::dynamic_pointer_cast<Number>(PairFirst{evInterval}.eval(env));
+    auto right = std::dynamic_pointer_cast<Number>(PairSecond{evInterval}.eval(env));
+    auto evFunction = std::dynamic_pointer_cast<Function>(function->eval(env));
+    if (evInterval == nullptr || evFunction == nullptr)
+    {
+        return nullptr;
+    }
+    return bisectionMethod(left, right, evFunction, env);
+}
+std::string FindRootBisection::toString() const noexcept
+{
+    return "Interval: " + interval->toString() + " | Function: " + function->toString();
+}
+

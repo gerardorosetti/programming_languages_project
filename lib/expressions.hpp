@@ -35,6 +35,16 @@ public:
     BinaryExpression(std::shared_ptr<Expression> _leftExpression, std::shared_ptr<Expression> _rigthExpression);
 };
 
+class Impossible : public Value
+{
+protected:
+    std::string value = "IMPOSSIBLE";
+public:
+    Impossible();
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::string toString() const noexcept;
+};
+
 class Number : public Value
 {
 protected:
@@ -227,7 +237,18 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::string toString() const noexcept override;
 };
-
+class RealEigenvalues : public Value
+{
+private:
+    std::shared_ptr<Matrix> matrix;
+    void determ(std::vector<double> G, std::vector<std::vector<double>> A, double X, double &SL, size_t L) const;
+    void bisec(std::vector<double> G, std::vector<std::vector<double>> A, double XL, double XH, double &XM, size_t L) const;
+    std::vector<std::shared_ptr<Expression>> eigenvalues(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
+public:
+    RealEigenvalues(std::shared_ptr<Matrix> _matrix);
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::string toString() const noexcept override;
+};
 class Determinant : public Value
 {
 private:
@@ -286,6 +307,20 @@ private:
     std::shared_ptr<Pair> rungekuttaMethod(double t, double x, double f, double h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const;
 public:
     ODEFirstOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Pair> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable);
+    std::shared_ptr<Expression> eval(Environment& env) const override;
+    std::string toString() const noexcept override;
+};
+
+class FindRootBisection : public Expression
+{
+private:
+    std::shared_ptr<Pair> interval;
+    std::shared_ptr<Function> function;
+    std::shared_ptr<Variable> variable;
+    std::shared_ptr<Number> iterationLimit;
+    std::shared_ptr<Number> bisectionMethod(std::shared_ptr<Number> left, std::shared_ptr<Number> right, std::shared_ptr<Function> function, Environment& env) const;
+public:
+    FindRootBisection(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function, std::shared_ptr<Variable> _variable, std::shared_ptr<Number> _iterationLimit = std::make_shared<Number>(100));
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::string toString() const noexcept override;
 };

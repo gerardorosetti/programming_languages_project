@@ -16,7 +16,8 @@ enum class DataType
     Vector,
     Matrix,
     Number,
-    Variable
+    Variable,
+    Impossible
 };
 
 class Expression;
