@@ -1004,69 +1004,6 @@ void RealEigenvalues::bisec(std::vector<double> auxialiaryVector, std::vector<st
 }
 std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
 {
-    /*size_t size = matrix.size();
-    std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), temporalMatrix(size, std::vector<double>(size)), eigenvaluesIterations(size + 1, std::vector<double>(size + 1));
-    for (size_t i = 0; i < size; ++i)
-    {
-        for (size_t j = 0; j < size; ++j)
-        {
-            answerMatrix[i][j] = std::dynamic_pointer_cast<Number>(matrix[i][j])->getNumber();
-        }
-    }
-
-    std::vector<double> auxiliaryVector(size);
-    for (int idx = 0; idx < size - 2; ++idx)
-    {
-        double sum = 0;
-        for (int i = 0; i < size; ++i)
-        {
-            auxiliaryVector[i] = 0;
-            if (i > idx + 1) auxiliaryVector[i] = answerMatrix[i][idx];
-            if (i > idx) sum += answerMatrix[i][idx] * answerMatrix[i][idx];
-        }
-        double sign = 1;
-        if (answerMatrix[idx + 1][idx] < 0) sign = -1;
-        double squareRoot = sqrt(sum);
-        double h = sum + std::abs(answerMatrix[idx + 1][idx]) * squareRoot;
-        auxiliaryVector[idx + 1] = answerMatrix[idx + 1][idx] + squareRoot * sign;
-        double quotient = 0;
-        for (int i = 0; i < size; ++i)
-        {
-            for (int j = 0; j < size; ++j)
-            {
-                quotient += auxiliaryVector[i] * answerMatrix[i][j] * auxiliaryVector[j];
-                if ((i <= idx) && (j <= idx))
-                {
-                    temporalMatrix[i][j] = answerMatrix[i][j];
-                    continue;
-                }
-                if ((j == idx) && (i >= idx + 2))
-                {
-                    temporalMatrix[i][j] = 0;
-                    continue;
-                }
-                double middleValue = 0;
-                for (int k = 0; k < size; ++k)
-                {
-                    middleValue -= (auxiliaryVector[i] * answerMatrix[k][j] + answerMatrix[i][k] * auxiliaryVector[j]) * auxiliaryVector[k];
-                }
-                temporalMatrix[i][j] = answerMatrix[i][j] + middleValue / h;
-            }
-        }
-        quotient /= h * h;
-        for (int i = 0; i < size; ++i)
-        {
-            for (int j = 0; j < size; ++j)
-            {
-                answerMatrix[i][j] = temporalMatrix[i][j] + quotient * auxiliaryVector[i] * auxiliaryVector[j];
-                if (std::abs(answerMatrix[i][j]) < 0.000001)
-                {
-                    answerMatrix[i][j] = 0;
-                }
-            }
-        }
-    }*/
-
     size_t size = matrix.size();
     std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), eigenvaluesIterations(size + 1, std::vector<double>(size + 1));
     for (size_t i = 0; i < size; ++i)
@@ -1113,13 +1050,9 @@ std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vecto
 }
 std::shared_ptr<Expression> RealEigenvalues::eval(Environment& env) const
 {
-    //auto evMatrix = matrix->eval(env);
     auto tridiagonalMatrix = std::make_shared<TridiagonalMatrix>(matrix)->eval(env);
     auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(tridiagonalMatrix)->getMatrixExpression());
     return std::make_shared<Vector>(values);
-    /*auto evMatrix = matrix->eval(env);
-    auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(evMatrix)->getMatrixExpression());
-    return std::make_shared<Vector>(values);*/
 }
 std::string RealEigenvalues::toString() const noexcept
 {
