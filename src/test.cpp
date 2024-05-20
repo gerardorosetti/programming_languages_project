@@ -333,6 +333,8 @@ void Test::TridiagonalMatrixTest()
 {
     print.execute(nullptr, "\n\nTRIDIAGONAL MATRIX TEST\n");
 
+    //test 1s
+
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
     std::vector<std::shared_ptr<Expression>> vecMat1 = {std::make_shared<Number>(2), std::make_shared<Number>(1), std::make_shared<Number>(-3)};
@@ -343,11 +345,29 @@ void Test::TridiagonalMatrixTest()
 
     std::shared_ptr<Expression> trid = std::make_shared<TridiagonalMatrix>(std::dynamic_pointer_cast<Matrix>(m1));
 
-    print.execute(nullptr,"\nExpression: \n");
+    print.execute(nullptr,"\nExpression for test 1: \n");
     display.execute(trid);
 
-    print.execute(nullptr,"Eval: \n");
+    print.execute(nullptr,"Eval for test 1: \n");
     display.execute(trid->eval(emptyEnv));
+
+    //test 2
+
+    std::vector<std::shared_ptr<Expression>> vecMat4 = {std::make_shared<Number>(4), std::make_shared<Number>(3), std::make_shared<Number>(2), std::make_shared<Number>(1)};
+    std::vector<std::shared_ptr<Expression>> vecMat5 = {std::make_shared<Number>(3), std::make_shared<Number>(3), std::make_shared<Number>(2), std::make_shared<Number>(1)};
+    std::vector<std::shared_ptr<Expression>> vecMat6 = {std::make_shared<Number>(2), std::make_shared<Number>(2), std::make_shared<Number>(2), std::make_shared<Number>(1)};
+    std::vector<std::shared_ptr<Expression>> vecMat7 = {std::make_shared<Number>(1), std::make_shared<Number>(1), std::make_shared<Number>(1), std::make_shared<Number>(1)};
+    std::vector<std::vector<std::shared_ptr<Expression>>> ma2 = {vecMat4, vecMat5, vecMat6, vecMat7};
+
+    std::shared_ptr<Expression> m2 = std::make_shared<Matrix>(ma2);
+
+    std::shared_ptr<Expression> trid2 = std::make_shared<TridiagonalMatrix>(std::dynamic_pointer_cast<Matrix>(m2));
+
+    print.execute(nullptr,"\nExpression for test 2: \n");
+    display.execute(trid2);
+
+    print.execute(nullptr,"Eval for test 2: \n");
+    display.execute(trid2->eval(emptyEnv));
 }
 
 void Test::RealEigenvaluesTest() // Only works with real numbers

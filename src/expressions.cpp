@@ -87,7 +87,7 @@ char Variable::getVariable() const
 
 // Addition
 std::shared_ptr<Expression> Addition::eval(Environment& env) const
-{       
+{
     auto exp1 = leftExpression->eval(env);
     auto exp2 = rigthExpression->eval(env);
     auto element1 = std::dynamic_pointer_cast<Value>(exp1);
@@ -151,7 +151,7 @@ std::shared_ptr<Expression> Subtraction::eval(Environment& env) const
     if (element1 == nullptr || element2 == nullptr)
     {
         return std::make_shared<Subtraction>(exp1, exp2);
-    }    
+    }
     if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
     {
         return std::make_shared<Subtraction>(exp1, exp2);
@@ -704,17 +704,6 @@ std::shared_ptr<Expression> InverseMatrix::gauss(std::vector<std::vector<std::sh
 
         if (matrix[i][i] == 0) // Singular Matrix Found
         {
-            /*std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-            for (size_t idx = 0; idx < size; ++idx)
-            {
-                std::vector<std::shared_ptr<Expression>> newVector;
-                for (size_t j = 0; j < size; ++j)
-                {
-                    newVector.push_back(std::make_shared<Number>(matrix[idx][j]));
-                }
-                newMatrix.push_back(newVector);
-            }
-            return newMatrix;*/
             return std::make_shared<Impossible>();
         }
 
@@ -738,17 +727,6 @@ std::shared_ptr<Expression> InverseMatrix::gauss(std::vector<std::vector<std::sh
 
     if (matrix[size - 1][size - 1] == 0) // Singular Matrix Found
     {
-        /*std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-        for (size_t i = 0; i < size; ++i)
-        {
-            std::vector<std::shared_ptr<Expression>> newVector;
-            for (size_t j = 0; j < size; ++j)
-            {
-                newVector.push_back(std::make_shared<Number>(matrix[i][j]));
-            }
-            newMatrix.push_back(newVector);
-        }
-        return newMatrix;*/
         return std::make_shared<Impossible>();
     }
 
@@ -833,7 +811,6 @@ std::pair<std::vector<std::vector<std::shared_ptr<Expression>>>, std::vector<std
         }
         if (maxIndex != k)
         {
-            //std::swap(P[k], P[maxIndex]);
             std::swap(U[k], U[maxIndex]);
             for (int i = 0; i < k; ++i)
             {
@@ -885,73 +862,76 @@ std::string MatrixLU::toString() const noexcept
 TridiagonalMatrix::TridiagonalMatrix(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
 std::vector<std::vector<std::shared_ptr<Expression>>> TridiagonalMatrix::tridiagonal(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
 {
-    size_t N = matrix.size();
-    std::vector<std::vector<double>> A(N + 1, std::vector<double>(N + 1)), T(N + 1, std::vector<double>(N + 1));
-    for (size_t i = 1; i <= N; ++i)
+    size_t size = matrix.size();
+    std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), temporalMatrix(size, std::vector<double>(size));
+    for (size_t i = 0; i < size; ++i)
     {
-        for (size_t j = 1; j <= N; ++j)
+        for (size_t j = 0; j < size; ++j)
         {
-            A[i][j] = std::dynamic_pointer_cast<Number>(matrix[i - 1][j - 1])->getNumber();
+            answerMatrix[i][j] = std::dynamic_pointer_cast<Number>(matrix[i][j])->getNumber();
         }
     }
 
-    std::vector<double> U(N + 1);
-    for (int IR = 1; IR <= N - 2; ++IR)
+    std::vector<double> auxiliaryVector(size);
+    for (int idx = 0; idx < size - 2; ++idx)
     {
-        double S = 0;
-        for (int I = 1; I <= N; ++I)
+        double sum = 0;
+        for (int i = 0; i < size; ++i)
         {
-            U[I] = 0;
-            if (I > IR + 1) U[I] = A[I][IR];
-            if (I > IR) S += A[I][IR] * A[I][IR];
+            auxiliaryVector[i] = 0;
+            if (i > idx + 1) auxiliaryVector[i] = answerMatrix[i][idx];
+            if (i > idx) sum += answerMatrix[i][idx] * answerMatrix[i][idx];
         }
-        double W = 1;
-        if (A[IR + 1][IR] < 0) W = -1;
-        double SSR = sqrt(S);
-        double H = S + std::abs(A[IR + 1][IR]) * SSR;
-        U[IR + 1] = A[IR + 1][IR] + SSR * W;
-        double UAU = 0;
-        for (int I = 1; I <= N; ++I)
+        double sign = 1;
+        if (answerMatrix[idx + 1][idx] < 0) sign = -1;
+        double squareRoot = sqrt(sum);
+        double h = sum + std::abs(answerMatrix[idx + 1][idx]) * squareRoot;
+        auxiliaryVector[idx + 1] = answerMatrix[idx + 1][idx] + squareRoot * sign;
+        double quotient = 0;
+        for (int i = 0; i < size; ++i)
         {
-            for (int J = 1; J <= N; ++J)
+            for (int j = 0; j < size; ++j)
             {
-                UAU += U[I] * A[I][J] * U[J];
-                if ((I <= IR) && (J <= IR))
+                quotient += auxiliaryVector[i] * answerMatrix[i][j] * auxiliaryVector[j];
+                if ((i <= idx) && (j <= idx))
                 {
-                    T[I][J] = A[I][J];
+                    temporalMatrix[i][j] = answerMatrix[i][j];
                     continue;
                 }
-                if ((J == IR) && (I >= IR + 2))
+                if ((j == idx) && (i >= idx + 2))
                 {
-                    T[I][J] = 0;
+                    temporalMatrix[i][j] = 0;
                     continue;
                 }
-                double B23 = 0;
-                for (int K = 1; K <= N; ++K)
+                double middleValue = 0;
+                for (int k = 0; k < size; ++k)
                 {
-                    B23 -= (U[I] * A[K][J] + A[I][K] * U[J]) * U[K];
+                    middleValue -= (auxiliaryVector[i] * answerMatrix[k][j] + answerMatrix[i][k] * auxiliaryVector[j]) * auxiliaryVector[k];
                 }
-                T[I][J] = A[I][J] + B23 / H;
+                temporalMatrix[i][j] = answerMatrix[i][j] + middleValue / h;
             }
         }
-        UAU /= H * H;
-        for (int I = 1; I <= N; ++I)
+        quotient /= h * h;
+        for (int i = 0; i < size; ++i)
         {
-            for (int J = 1; J <= N; ++J)
+            for (int j = 0; j < size; ++j)
             {
-                A[I][J] = T[I][J] + UAU * U[I] * U[J];
-                if (std::abs(A[I][J]) < 0.000001) A[I][J] = 0;
+                answerMatrix[i][j] = temporalMatrix[i][j] + quotient * auxiliaryVector[i] * auxiliaryVector[j];
+                if (std::abs(answerMatrix[i][j]) < 0.000001)
+                {
+                    answerMatrix[i][j] = 0;
+                }
             }
         }
     }
 
     std::vector<std::vector<std::shared_ptr<Expression>>> newMatrix;
-    for (size_t i = 1; i <= N; ++i)
+    for (size_t i = 0; i < size; ++i)
     {
         std::vector<std::shared_ptr<Expression>> newVector;
-        for (size_t j = 1; j <= N; ++j)
+        for (size_t j = 0; j < size; ++j)
         {
-            newVector.push_back(std::make_shared<Number>(A[i][j]));
+            newVector.push_back(std::make_shared<Number>(answerMatrix[i][j]));
         }
         newMatrix.push_back(newVector);
     }
@@ -972,150 +952,150 @@ std::string TridiagonalMatrix::toString() const noexcept
 
 // Eigenvalues
 RealEigenvalues::RealEigenvalues(std::shared_ptr<Matrix> _matrix) : Value(DataType::Matrix), matrix(_matrix) {}
-void RealEigenvalues::determ(std::vector<double> G, std::vector<std::vector<double>> A, double X, double &SL, size_t L) const
+void RealEigenvalues::determ(std::vector<double> auxialiaryVector, std::vector<std::vector<double>> answerMatrix, double x, double& middle, size_t l) const
 {
-    G[0] = 1;
-    if (L == 1) return;
-    G[1] = A[1][1] - X;
-    if (L == 1) return;
-    for (int K = 2; K <= L; K++)
+    auxialiaryVector[0] = answerMatrix[0][0] - x;
+    if (l == 1) return;
+    for (int k = 1; k < l; ++k)
     {
-        G[K] = (A[K][K] - X) * G[K - 1] - A[K][K - 1] * A[K][K - 1] * G[K - 2];
+        auxialiaryVector[k] = (answerMatrix[k][k] - x) * auxialiaryVector[k - 1] - answerMatrix[k][k - 1] * answerMatrix[k][k - 1] * ((k - 2 < 0) ? 1 : auxialiaryVector[k - 2]);
     }
-    SL = G[L];
+    middle = auxialiaryVector[l - 1];
 }
-void RealEigenvalues::bisec(std::vector<double> G, std::vector<std::vector<double>> A, double XL, double XH, double &XM, size_t L) const
+void RealEigenvalues::bisec(std::vector<double> auxialiaryVector, std::vector<std::vector<double>> answerMatrix, double startInterval, double endInterval, double& middlePoint, size_t l) const
 {
-    int KA = 0;
-    double YL, YH, DX, XB, YM;
-    determ(G, A, XL, YL, L);
-    determ(G, A, XH, YH, L);
+    int iterationsCounter = 0;
+    double startValue, endValue, dx, xbValue, middleValue;
+    determ(auxialiaryVector, answerMatrix, startInterval, startValue, l);
+    determ(auxialiaryVector, answerMatrix, endInterval, endValue, l);
     while (true)
     {
-        KA++;
-        if (KA > 99) return;
-        DX = XH - XL;
-        if (DX < 0.0000001) return;
-        if (DX > 1)
+        ++iterationsCounter;
+        if (iterationsCounter > 99) return;
+        dx = endInterval - startInterval;
+        if (dx < 0.0000001) return;
+        if (dx > 1)
         {
-            XM = (XL + XH) / 2;
-            determ(G, A, XM, YM, L);
-            if (YL * YM < 0)
+            middlePoint = (startInterval + endInterval) / 2;
+            determ(auxialiaryVector, answerMatrix, middlePoint, middleValue, l);
+            if (startValue * middleValue < 0)
             {
-                XH = XM;
-                YH = YM;
+                endInterval = middlePoint;
+                endValue = middleValue;
                 continue;
             }
-            XL = XM;
-            YL = YM;
+            startInterval = middlePoint;
+            startValue = middleValue;
             continue;
         }
-        XB = XM;
-        XM = (XL * YH - XH * YL) / (YH - YL);
-        determ(G, A, XM, YM, L);
-        if (std::abs(XB - XM) < 0.000001) return;
-        if (YL * YM < 0)
+        xbValue = middlePoint;
+        middlePoint = (startInterval * endValue - endInterval * startValue) / (endValue - startValue);
+        determ(auxialiaryVector, answerMatrix, middlePoint, middleValue, l);
+        if (std::abs(xbValue - middlePoint) < 0.000001) return;
+        if (startValue * middleValue < 0)
         {
-            XH = XM;
-            YH = YM;
+            endInterval = middlePoint;
+            endValue = middleValue;
             continue;
         }
-        XL = XM;
-        YL = YM;
+        startInterval = middlePoint;
+        startValue = middleValue;
     }
 }
 std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
 {
-    size_t N = matrix.size();
-
-    std::vector<std::vector<double>> A(N + 1, std::vector<double>(N + 1)), T(N + 1, std::vector<double>(N + 1)), EI(N + 1, std::vector<double>(N + 1));
-    for (size_t i = 1; i <= N; ++i)
+    size_t size = matrix.size();
+    std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), temporalMatrix(size, std::vector<double>(size)), eigenvaluesIterations(size + 1, std::vector<double>(size + 1));
+    for (size_t i = 0; i < size; ++i)
     {
-        for (size_t j = 1; j <= N; ++j)
+        for (size_t j = 0; j < size; ++j)
         {
-            A[i][j] = std::dynamic_pointer_cast<Number>(matrix[i - 1][j - 1])->getNumber();
+            answerMatrix[i][j] = std::dynamic_pointer_cast<Number>(matrix[i][j])->getNumber();
         }
     }
 
-    std::vector<double> U(N + 1);
-    for (int IR = 1; IR <= N - 2; ++IR)
+    std::vector<double> auxiliaryVector(size);
+    for (int idx = 0; idx < size - 2; ++idx)
     {
-        double S = 0;
-        for (int I = 1; I <= N; ++I)
+        double sum = 0;
+        for (int i = 0; i < size; ++i)
         {
-            U[I] = 0;
-            if (I > IR + 1) U[I] = A[I][IR];
-            if (I > IR) S += A[I][IR] * A[I][IR];
+            auxiliaryVector[i] = 0;
+            if (i > idx + 1) auxiliaryVector[i] = answerMatrix[i][idx];
+            if (i > idx) sum += answerMatrix[i][idx] * answerMatrix[i][idx];
         }
-        double W = 1;
-        if (A[IR + 1][IR] < 0) W = -1;
-        double SSR = sqrt(S);
-        double H = S + std::abs(A[IR + 1][IR]) * SSR;
-        U[IR + 1] = A[IR + 1][IR] + SSR * W;
-        double UAU = 0;
-        for (int I = 1; I <= N; ++I)
+        double sign = 1;
+        if (answerMatrix[idx + 1][idx] < 0) sign = -1;
+        double squareRoot = sqrt(sum);
+        double h = sum + std::abs(answerMatrix[idx + 1][idx]) * squareRoot;
+        auxiliaryVector[idx + 1] = answerMatrix[idx + 1][idx] + squareRoot * sign;
+        double quotient = 0;
+        for (int i = 0; i < size; ++i)
         {
-            for (int J = 1; J <= N; ++J)
+            for (int j = 0; j < size; ++j)
             {
-                UAU += U[I] * A[I][J] * U[J];
-                if ((I <= IR) && (J <= IR))
+                quotient += auxiliaryVector[i] * answerMatrix[i][j] * auxiliaryVector[j];
+                if ((i <= idx) && (j <= idx))
                 {
-                    T[I][J] = A[I][J];
+                    temporalMatrix[i][j] = answerMatrix[i][j];
                     continue;
                 }
-                if ((J == IR) && (I >= IR + 2))
+                if ((j == idx) && (i >= idx + 2))
                 {
-                    T[I][J] = 0;
+                    temporalMatrix[i][j] = 0;
                     continue;
                 }
-                double B23 = 0;
-                for (int K = 1; K <= N; ++K)
+                double middleValue = 0;
+                for (int k = 0; k < size; ++k)
                 {
-                    B23 -= (U[I] * A[K][J] + A[I][K] * U[J]) * U[K];
+                    middleValue -= (auxiliaryVector[i] * answerMatrix[k][j] + answerMatrix[i][k] * auxiliaryVector[j]) * auxiliaryVector[k];
                 }
-                T[I][J] = A[I][J] + B23 / H;
+                temporalMatrix[i][j] = answerMatrix[i][j] + middleValue / h;
             }
         }
-        UAU /= H * H;
-        for (int I = 1; I <= N; ++I)
+        quotient /= h * h;
+        for (int i = 0; i < size; ++i)
         {
-            for (int J = 1; J <= N; ++J)
+            for (int j = 0; j < size; ++j)
             {
-                A[I][J] = T[I][J] + UAU * U[I] * U[J];
-                if (std::abs(A[I][J]) < 0.000001) A[I][J] = 0;
+                answerMatrix[i][j] = temporalMatrix[i][j] + quotient * auxiliaryVector[i] * auxiliaryVector[j];
+                if (std::abs(answerMatrix[i][j]) < 0.000001)
+                {
+                    answerMatrix[i][j] = 0;
+                }
             }
         }
     }
 
-    int KM = N;
-
-    for (size_t L = 1; L <= KM; ++L)
+    int maxIterations = size;
+    for (size_t l = 1; l <= maxIterations; ++l)
     {
-        if (L == 1)
+        if (l == 1)
         {
-            EI[1][1] = A[1][1];
+            eigenvaluesIterations[1][1] = answerMatrix[0][0];
         }
         else
         {
-            for (int J = 1; J <= L; ++J)
+            for (int j = 1; j <= l; ++j)
             {
-                double XL = EI[L - 1][J - 1];
-                double XH = EI[L - 1][J];
-                double XM;
-                bisec(U, A, XL, XH, XM, L);
-                EI[L][J] = XM;
+                double startInterval = eigenvaluesIterations[l - 1][j - 1];
+                double endInterval = eigenvaluesIterations[l - 1][j];
+                double middlePoint;
+                bisec(auxiliaryVector, answerMatrix, startInterval, endInterval, middlePoint, l);
+                eigenvaluesIterations[l][j] = middlePoint;
             }
         }
-        if (L < KM)
+        if (l < maxIterations)
         {
-            EI[L][0] = -99;
-            EI[L][L + 1] = 99;
+            eigenvaluesIterations[l][0] = -99;
+            eigenvaluesIterations[l][l + 1] = 99;
         }
     }
+
     std::vector<std::shared_ptr<Expression>> newVector{};
-    for (size_t i = 1; i <= N; ++i)
+    for (size_t i = 1; i <= size; ++i)
     {
-        newVector.push_back(std::make_shared<Number>(EI[N][i]));
+        newVector.push_back(std::make_shared<Number>(eigenvaluesIterations[size][i]));
     }
     return newVector;
 }
