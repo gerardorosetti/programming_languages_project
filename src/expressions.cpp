@@ -1004,7 +1004,7 @@ void RealEigenvalues::bisec(std::vector<double> auxialiaryVector, std::vector<st
 }
 std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const
 {
-    size_t size = matrix.size();
+    /*size_t size = matrix.size();
     std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), temporalMatrix(size, std::vector<double>(size)), eigenvaluesIterations(size + 1, std::vector<double>(size + 1));
     for (size_t i = 0; i < size; ++i)
     {
@@ -1065,7 +1065,19 @@ std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vecto
                 }
             }
         }
+    }*/
+
+    size_t size = matrix.size();
+    std::vector<std::vector<double>> answerMatrix(size, std::vector<double>(size)), eigenvaluesIterations(size + 1, std::vector<double>(size + 1));
+    for (size_t i = 0; i < size; ++i)
+    {
+        for (size_t j = 0; j < size; ++j)
+        {
+            answerMatrix[i][j] = std::dynamic_pointer_cast<Number>(matrix[i][j])->getNumber();
+        }
     }
+
+    std::vector<double> auxiliaryVector(size);
 
     int maxIterations = size;
     for (size_t l = 1; l <= maxIterations; ++l)
@@ -1101,9 +1113,13 @@ std::vector<std::shared_ptr<Expression>> RealEigenvalues::eigenvalues(std::vecto
 }
 std::shared_ptr<Expression> RealEigenvalues::eval(Environment& env) const
 {
-    auto evMatrix = matrix->eval(env);
-    auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(evMatrix)->getMatrixExpression());
+    //auto evMatrix = matrix->eval(env);
+    auto tridiagonalMatrix = std::make_shared<TridiagonalMatrix>(matrix)->eval(env);
+    auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(tridiagonalMatrix)->getMatrixExpression());
     return std::make_shared<Vector>(values);
+    /*auto evMatrix = matrix->eval(env);
+    auto values = eigenvalues(std::dynamic_pointer_cast<Matrix>(evMatrix)->getMatrixExpression());
+    return std::make_shared<Vector>(values);*/
 }
 std::string RealEigenvalues::toString() const noexcept
 {
