@@ -1398,7 +1398,7 @@ std::string ODEFirstOrderInitialValues::toString() const noexcept
 FindRootBisection::FindRootBisection(std::shared_ptr<Pair> _interval, std::shared_ptr<Function> _function, std::shared_ptr<Variable> _variable, std::shared_ptr<Number> _iterationLimit) : interval(_interval), function(_function), variable(_variable), iterationLimit(_iterationLimit) {}
 std::shared_ptr<Number> FindRootBisection::bisectionMethod(std::shared_ptr<Number> left, std::shared_ptr<Number> right, std::shared_ptr<Function> evFunction, Environment& env) const
 {
-    double a = left->getNumber(), c = right->getNumber(), ep = 0.0001;
+    double a = left->getNumber(), c = right->getNumber(), ep = 0.000001;
     size_t il = iterationLimit->getNumber();
 
     char var = variable->getVariable();

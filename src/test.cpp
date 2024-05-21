@@ -431,7 +431,7 @@ void Test::TridiagonalMatrixTest()
 
 void Test::RealEigenvaluesTest() // Only works with real numbers
 {
-    print.execute(nullptr, "\n\nEigenvalues Test\n");
+    print.execute(nullptr, "\n\nEIGENVALUES TEST\n");
 
     Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
 
@@ -445,6 +445,10 @@ void Test::RealEigenvaluesTest() // Only works with real numbers
 
     std::shared_ptr<Expression> values = std::make_shared<RealEigenvalues>(std::dynamic_pointer_cast<Matrix>(m1));//->eval(emptyEnv);
 
+    print.execute(nullptr,"\nExpression: \n");
+    display.execute(values);
+
+    print.execute(nullptr,"Eval: \n");
     display.execute(values->eval(emptyEnv));
 }
 
