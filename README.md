@@ -4,7 +4,7 @@ This is a specific language oriented to solve basic mathematics problems using n
 ## Installation
 In order to Use the Lenguaje you need to install c++17.
 
-Provide step-by-step instructions on how to install and set up the project
+Provide step-by-step instructions on how to install and set up the project, a makefille its provided for comfortable compilation and execution.
 ```bash
 git clone https://github.com/gerardorosetti/programming_languages_project.git
 cd programming_languages_project
