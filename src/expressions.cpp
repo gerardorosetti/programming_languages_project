@@ -308,6 +308,11 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     {
         return nullptr;
     }
+    if (num2->getNumber() == 0)
+    {
+        std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+        return imp;
+    }
     double result = num1->getNumber() / num2->getNumber();
     return std::make_shared<Number>(result);
 }
@@ -338,6 +343,11 @@ std::shared_ptr<Expression> Power::eval(Environment& env) const
     {
         return nullptr;
     }
+    if (num2->getNumber() <= 0 && num1->getNumber() == 0)
+    {
+        std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+        return imp;
+    }
     double result = std::pow(num1->getNumber(), num2->getNumber());
     return std::make_shared<Number>(result);
 }
@@ -364,6 +374,11 @@ std::shared_ptr<Expression> NaturalLogarithm::eval(Environment& env) const
     if (num1 == nullptr)
     {
         return nullptr;
+    }
+    if (num1->getNumber() <= 0)
+    {
+        std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
+        return imp;
     }
     double result = std::log(num1->getNumber());
     return std::make_shared<Number>(result);
@@ -395,6 +410,11 @@ std::shared_ptr<Expression> Logarithm::eval(Environment& env) const
     {
         return nullptr;
     }
+    if (num1->getNumber() <= 0 || num2->getNumber() <= 0 || num2->getNumber() == 1)
+    {
+        return std::make_shared<Impossible>();
+    }
+
     double result = std::log(num1->getNumber()) / std::log(num2->getNumber());
     return std::make_shared<Number>(result);
 }
@@ -402,6 +422,72 @@ std::shared_ptr<Expression> Logarithm::eval(Environment& env) const
 std::string Logarithm::toString() const noexcept
 {
     return "lg" + leftExpression->toString() + "(" + rigthExpression->toString() + ")";
+}
+
+// Square Root
+std::shared_ptr<Expression> SquareRoot::eval(Environment& env) const
+{
+    auto exp1 = expression->eval(env);
+    auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+    if (element1 == nullptr)
+    {
+        return std::make_shared<SquareRoot>(exp1);
+    }
+    if(element1->getDataType() == DataType::Variable)
+    {
+        return std::make_shared<SquareRoot>(exp1);
+    }
+    auto num1 = std::dynamic_pointer_cast<Number>(exp1);
+    if (num1 == nullptr)
+    {
+        return nullptr;
+    }
+    if (num1->getNumber() < 0)
+    {
+        return std::make_shared<Impossible>();
+    }
+    double result = std::sqrt(num1->getNumber());
+    return std::make_shared<Number>(result);
+}
+
+std::string SquareRoot::toString() const noexcept
+{
+    return "√(" + expression->toString() + ")";
+}
+
+// Root
+std::shared_ptr<Expression> Root::eval(Environment& env) const
+{
+    auto exp1 = leftExpression->eval(env);
+    auto exp2 = rigthExpression->eval(env);
+    auto element1 = std::dynamic_pointer_cast<Value>(exp1);
+    auto element2 = std::dynamic_pointer_cast<Value>(exp2);
+    if (element1 == nullptr || element2 == nullptr)
+    {
+        return std::make_shared<Root>(exp1, exp2);
+    }
+    if (element1->getDataType() == DataType::Variable || element2->getDataType() == DataType::Variable)
+    {
+        return std::make_shared<Root>(exp1, exp2);
+    }
+    auto num1 = std::dynamic_pointer_cast<Number>(exp1);
+    auto num2 = std::dynamic_pointer_cast<Number>(exp2);
+    if (num1 == nullptr || num2 == nullptr)
+    {
+        return nullptr;
+    }
+    if (num2->getNumber() <= 0 || num1->getNumber() < 0)
+    {
+        return std::make_shared<Impossible>();
+    }
+    //return std::make_shared<Number>(std::make_shared<Power>(num1->getNumber(), 1.0 / num2->getNumber()));
+    double result = std::pow(num1->getNumber(), 1.0 / num2->getNumber());
+    return std::make_shared<Number>(result);
+}
+
+std::string Root::toString() const noexcept
+{
+    return "(" + rigthExpression->toString() + ")^√(" + leftExpression->toString() + ")";
 }
 
 //Sine
@@ -476,6 +562,10 @@ std::shared_ptr<Expression> Tangent::eval(Environment& env) const
     {
         return nullptr;
     }
+    if (std::fmod(num1->getNumber(), 90) == 0)
+    {
+        return std::make_shared<Impossible>();
+    }
     double result = std::tan(num1->getNumber());
     return std::make_shared<Number>(result);
 }
@@ -502,6 +592,10 @@ std::shared_ptr<Expression> Cotangent::eval(Environment& env) const
     if (num1 == nullptr)
     {
         return nullptr;
+    }
+    if (std::fmod(num1->getNumber(), 180) == 0)
+    {
+        return std::make_shared<Impossible>();
     }
     double result = 1 / std::tan(num1->getNumber());
     return std::make_shared<Number>(result);
@@ -848,7 +942,7 @@ std::shared_ptr<Expression> MatrixLU::eval(Environment& env) const
     auto mat = evMatrix->getMatrixExpression();
     if (mat.size() != mat[0].size()) // Validation for a Square Matrix
     {
-        return nullptr;
+        return std::make_shared<Impossible>();
     }
     auto matrixPair = lowerUpperDecomposition(mat);
     return std::make_shared<Pair>(std::make_shared<Matrix>(matrixPair.first), std::make_shared<Matrix>(matrixPair.second));
@@ -942,6 +1036,10 @@ std::shared_ptr<Expression> TridiagonalMatrix::eval(Environment& env) const
 {
     auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
     auto mat = evMatrix->getMatrixExpression();
+    if (mat.size() != mat[0].size()) // Validation for Square Matrix
+    {
+        return std::make_shared<Impossible>();
+    }
     return std::make_shared<Matrix>(tridiagonal(mat));
 }
 
@@ -1076,7 +1174,7 @@ std::string Determinant::toString() const noexcept
 {
     return "Matrix to calculate determinant: \n"+ matrix->toString();
 }
-//Equation
+/*//Equation
 std::shared_ptr<Expression> Equation::eval(Environment& env) const
 {
     auto exp1 = leftExpression->eval(env);
@@ -1090,15 +1188,18 @@ std::shared_ptr<Expression> Equation::eval(Environment& env) const
 std::string Equation::toString() const noexcept
 {
     return leftExpression->toString() + " = " + rigthExpression->toString();
-}
+}*/
 
 //Function
 std::shared_ptr<Expression> Function::eval(Environment& env) const
 {
-    if (std::dynamic_pointer_cast<Value>(expression->eval(env)) != nullptr )
+    auto exp = std::dynamic_pointer_cast<Value>(expression->eval(env));
+    //if (std::dynamic_pointer_cast<Value>(expression->eval(env)) != nullptr )
+    if (exp != nullptr )
     {
-        auto exp = expression->eval(env);
-        return std::dynamic_pointer_cast<Number>(exp);
+        //auto exp = expression->eval(env);
+        //return std::dynamic_pointer_cast<Number>(exp);
+        return exp;
     }
     else
     {
@@ -1164,11 +1265,15 @@ std::shared_ptr<Number> Integral::simpsonMethod(double a, double b, int n, std::
 std::shared_ptr<Expression> Integral::eval(Environment& env) const
 {
     auto inter = interval->eval(env);
-    auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}.eval(env));
-    auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}.eval(env));
-    if (to->getDataType() != DataType::Number || tf->getDataType() != DataType::Number)
+    if (inter == nullptr)
     {
         return nullptr;
+    }
+    auto to = std::dynamic_pointer_cast<Number>(PairFirst{inter}.eval(env));
+    auto tf = std::dynamic_pointer_cast<Number>(PairSecond{inter}.eval(env));
+    if (to == nullptr || tf == nullptr)
+    {
+        return std::make_shared<Impossible>();
     }
     double a = to->getNumber();
     double b = tf->getNumber();
@@ -1195,8 +1300,14 @@ std::shared_ptr<Expression> Interpolate::eval(Environment& env) const
         {
             return nullptr;
         }
-        x.push_back(std::dynamic_pointer_cast<Number>(PairFirst{pair}.eval(env))->getNumber());
-        f.push_back(std::dynamic_pointer_cast<Number>(PairSecond{pair}.eval(env))->getNumber());
+        auto num = std::dynamic_pointer_cast<Number>(PairFirst{pair}.eval(env));
+        auto num2 = std::dynamic_pointer_cast<Number>(PairSecond{pair}.eval(env));
+        if (num == nullptr || num2 == nullptr)
+        {
+            return std::make_shared<Impossible>();
+        }
+        x.push_back(num->getNumber());
+        f.push_back(num2->getNumber());
     }
     double y_res = 0.0;
     for (int i = 0; i < n; ++i) {
@@ -1279,7 +1390,7 @@ std::shared_ptr<Expression> ODEFirstOrderInitialValues::eval(Environment& env) c
     auto tEval = std::dynamic_pointer_cast<Number>(tFinal->eval(env));
     if (to->getDataType() != DataType::Number || xo->getDataType() != DataType::Number || tEval->getDataType() != DataType::Number)
     {
-        return nullptr;
+        return std::make_shared<Impossible>();
     }
     double t = to->getNumber();
     double x = xo->getNumber();

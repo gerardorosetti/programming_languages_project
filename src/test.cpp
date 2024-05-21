@@ -59,12 +59,12 @@ void Test::ExpressionTest()
     std::shared_ptr<Expression> func2 = std::make_shared<Function>(sum1);
 
     print.execute(nullptr,"\nPower, Trigonometrics, ln: ");
-    display.execute(func2->eval(emptyEnv));
+    display.execute(func2/*->eval(emptyEnv)*/);
 
-    std::shared_ptr<Expression> eq = std::make_shared<Equation>(func,func2);
+    /*std::shared_ptr<Expression> eq = std::make_shared<Equation>(func,func2);
 
     print.execute(nullptr,"\nEquation: ");
-    display.execute(eq);
+    display.execute(eq);*/
 
     std::shared_ptr<Expression> to = std::make_shared<Number>(0);
     std::shared_ptr<Expression> tf = std::make_shared<Number>(10);
@@ -278,6 +278,41 @@ void Test::PowerTest()
     std::shared_ptr<Expression> num2 = std::make_shared<Number>(2);
 
     std::shared_ptr<Expression> exp = std::make_shared<Power>(num1,num2);
+
+    print.execute(nullptr,"\nExpression: ");
+    display.execute(exp);
+
+    print.execute(nullptr,"Eval: ");
+    display.execute(exp->eval(emptyEnv));
+}
+
+void Test::SquareRootTest()
+{
+    print.execute(nullptr, "\n\nSQUARE ROOT TEST\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::shared_ptr<Expression> num1 = std::make_shared<Number>(16);
+
+    std::shared_ptr<Expression> exp = std::make_shared<SquareRoot>(num1);
+
+    print.execute(nullptr,"\nExpression: ");
+    display.execute(exp);
+
+    print.execute(nullptr,"Eval: ");
+    display.execute(exp->eval(emptyEnv));
+}
+
+void Test::RootTest()
+{
+    print.execute(nullptr, "\n\nROOT TEST\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::shared_ptr<Expression> num1 = std::make_shared<Number>(27);
+    std::shared_ptr<Expression> num2 = std::make_shared<Number>(3);
+
+    std::shared_ptr<Expression> exp = std::make_shared<Root>(num1, num2);
 
     print.execute(nullptr,"\nExpression: ");
     display.execute(exp);
