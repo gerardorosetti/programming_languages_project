@@ -292,13 +292,6 @@ public:
     std::string toString() const noexcept override;
 };
 
-/*class Equation : public BinaryExpression
-{
-public:
-    using BinaryExpression::BinaryExpression;
-    std::shared_ptr<Expression> eval(Environment& env) const override;
-    std::string toString() const noexcept override;
-};*/
 class Function : public UnaryExpression
 {
 public:

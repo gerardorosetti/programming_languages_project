@@ -28,6 +28,10 @@ std::string Impossible::toString() const noexcept
 Number::Number(double _number) : Value(DataType::Number), number{_number} {}
 std::shared_ptr<Expression> Number::eval(Environment& env) const
 {
+    if (std::abs(number) <= 0.0000000001)
+    {
+        return std::make_shared<Number>(0.0);
+    }
     return std::make_shared<Number>(number);
 }
 std::string Number::toString() const noexcept
@@ -308,7 +312,7 @@ std::shared_ptr<Expression> Division::eval(Environment& env) const
     {
         return nullptr;
     }
-    if (num2->getNumber() == 0)
+    if (std::abs(num2->getNumber()) <= 0.00000001)
     {
         std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
         return imp;
@@ -343,7 +347,7 @@ std::shared_ptr<Expression> Power::eval(Environment& env) const
     {
         return nullptr;
     }
-    if (num2->getNumber() <= 0 && num1->getNumber() == 0)
+    if (num2->getNumber() <= 0 && std::abs(num1->getNumber()) <= 0.00000001)
     {
         std::shared_ptr<Expression> imp = std::make_shared<Impossible>();
         return imp;
@@ -562,7 +566,7 @@ std::shared_ptr<Expression> Tangent::eval(Environment& env) const
     {
         return nullptr;
     }
-    if (std::fmod(num1->getNumber(), 90) == 0)
+    if (std::abs(std::cos(num1->getNumber())) <= 0.00000001)
     {
         return std::make_shared<Impossible>();
     }
@@ -593,7 +597,7 @@ std::shared_ptr<Expression> Cotangent::eval(Environment& env) const
     {
         return nullptr;
     }
-    if (std::fmod(num1->getNumber(), 180) == 0)
+    if (std::abs(std::sin(num1->getNumber())) <= 0.00000001)
     {
         return std::make_shared<Impossible>();
     }
@@ -853,7 +857,7 @@ std::shared_ptr<Expression> InverseMatrix::eval(Environment& env) const
 {
     auto evMatrix = std::dynamic_pointer_cast<Matrix>(matrix->eval(env));
     auto mat = evMatrix->getMatrixExpression();
-    if (mat.size() != mat[0].size())
+    if (mat.size() != mat[0].size()) // Validation for Square Matrix
     {
         return std::make_shared<Impossible>();
     }
@@ -1174,21 +1178,6 @@ std::string Determinant::toString() const noexcept
 {
     return "Matrix to calculate determinant: \n"+ matrix->toString();
 }
-/*//Equation
-std::shared_ptr<Expression> Equation::eval(Environment& env) const
-{
-    auto exp1 = leftExpression->eval(env);
-    auto exp2 = rigthExpression->eval(env);
-    if (exp1 == nullptr || exp2 == nullptr)
-    {
-        return nullptr;
-    }
-    return std::make_shared<Equation>(exp1, exp2);
-}
-std::string Equation::toString() const noexcept
-{
-    return leftExpression->toString() + " = " + rigthExpression->toString();
-}*/
 
 //Function
 std::shared_ptr<Expression> Function::eval(Environment& env) const

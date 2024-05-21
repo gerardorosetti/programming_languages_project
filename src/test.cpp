@@ -321,6 +321,35 @@ void Test::RootTest()
     display.execute(exp->eval(emptyEnv));
 }
 
+void Test::TrigonometricsTest()
+{
+    print.execute(nullptr, "\n\nTRIGONOMETRICS TEST\n");
+
+    Environment emptyEnv = std::forward_list<std::pair<char, std::shared_ptr<Expression>>>{};
+
+    std::shared_ptr<Expression> sin = std::make_shared<Sine>(std::make_shared<PI>());
+    std::shared_ptr<Expression> cos = std::make_shared<Cosine>(std::make_shared<PI>());
+    std::shared_ptr<Expression> tan = std::make_shared<Tangent>(std::make_shared<PI>());
+    std::shared_ptr<Expression> ctg = std::make_shared<Cotangent>(std::make_shared<PI>());
+    std::shared_ptr<Expression> tan2 = std::make_shared<Tangent>(std::make_shared<Division>(std::make_shared<PI>(),std::make_shared<Number>(2)));
+    std::shared_ptr<Expression> ctg2 = std::make_shared<Cotangent>(std::make_shared<Division>(std::make_shared<PI>(),std::make_shared<Number>(2)));
+
+    print.execute(nullptr,"\nExpressions:\n");
+    display.execute(sin);
+    display.execute(cos);
+    display.execute(tan);
+    display.execute(ctg);
+    display.execute(tan2);
+    display.execute(ctg2);
+
+    print.execute(nullptr,"\nEvals:\n");
+    display.execute(sin->eval(emptyEnv));
+    display.execute(cos->eval(emptyEnv));
+    display.execute(tan->eval(emptyEnv));
+    display.execute(ctg->eval(emptyEnv));
+    display.execute(tan2->eval(emptyEnv));
+    display.execute(ctg2->eval(emptyEnv));
+}
 void Test::InverseMatrixTest()
 {
     print.execute(nullptr, "\n\nINVERSE MATRIX TEST\n");
@@ -542,7 +571,7 @@ void Test::ODEFirstOrderInitialValuesTest()
     std::shared_ptr<Expression> to = std::make_shared<Number>(0);
     std::shared_ptr<Expression> xo = std::make_shared<Number>(0);
 
-    std::shared_ptr<Expression> num1 = std::make_shared<Number>(-3);
+    std::shared_ptr<Expression> num1 = std::make_shared<Number>(3);
     std::shared_ptr<Expression> num2 = std::make_shared<Number>(125);
     std::shared_ptr<Expression> var = std::make_shared<Variable>('x');
 
@@ -550,7 +579,7 @@ void Test::ODEFirstOrderInitialValuesTest()
     std::shared_ptr<Expression> mult = std::make_shared<Multiplication>(div,var);
 
     std::shared_ptr<Expression> num3 = std::make_shared<Number>(0.6);
-    std::shared_ptr<Expression> sum = std::make_shared<Addition>(mult, num3);
+    std::shared_ptr<Expression> sum = std::make_shared<Subtraction>(num3, mult);
 
     std::shared_ptr<Expression> tFinal = std::make_shared<Number>(30);
 

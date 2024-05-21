@@ -19,6 +19,7 @@ public:
     static void PowerTest();
     static void SquareRootTest();
     static void RootTest();
+    static void TrigonometricsTest();
     static void InverseMatrixTest();
     static void MatrixLUTest();
     static void TridiagonalMatrixTest();

@@ -14,6 +14,7 @@ int main()
     Test::PowerTest();
     Test::SquareRootTest();
     Test::RootTest();
+    Test::TrigonometricsTest();
     Test::InverseMatrixTest();
     Test::MatrixLUTest();
     Test::TridiagonalMatrixTest();
