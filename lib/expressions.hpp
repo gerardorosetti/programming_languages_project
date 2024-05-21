@@ -241,7 +241,6 @@ class InverseMatrix : public Value
 {
 private:
     std::shared_ptr<Matrix> matrix;
-    //std::vector<std::vector<std::shared_ptr<Expression>>> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
     std::shared_ptr<Expression> gauss(std::vector<std::vector<std::shared_ptr<Expression>>> matrix) const;
 public:
     InverseMatrix(std::shared_ptr<Matrix> _matrix);
@@ -350,16 +349,3 @@ public:
     std::shared_ptr<Expression> eval(Environment& env) const override;
     std::string toString() const noexcept override;
 };
-
-/*class ODESecondOrder : public Expression
-{
-private:
-    std::shared_ptr<Function> funct;
-    std::shared_ptr<Vector> initialValue;
-    std::shared_ptr<Number> tFinal;
-    std::shared_ptr<Variable> variable;
-    std::shared_ptr<Number> rungekuttaMethod(double t, double x, int f, int h, std::shared_ptr<Expression> function, Environment& env, std::shared_ptr<Variable> variable) const;
-public:
-    ODESecondOrder(std::shared_ptr<Function> _funct, std::shared_ptr<Vector> _initialValue, std::shared_ptr<Number> _tFinal, std::shared_ptr<Variable> _variable);
-    std::shared_ptr<Expression> eval(Environment& env) const override;
-};*/

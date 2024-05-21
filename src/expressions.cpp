@@ -484,7 +484,6 @@ std::shared_ptr<Expression> Root::eval(Environment& env) const
     {
         return std::make_shared<Impossible>();
     }
-    //return std::make_shared<Number>(std::make_shared<Power>(num1->getNumber(), 1.0 / num2->getNumber()));
     double result = std::pow(num1->getNumber(), 1.0 / num2->getNumber());
     return std::make_shared<Number>(result);
 }
@@ -1183,11 +1182,8 @@ std::string Determinant::toString() const noexcept
 std::shared_ptr<Expression> Function::eval(Environment& env) const
 {
     auto exp = std::dynamic_pointer_cast<Value>(expression->eval(env));
-    //if (std::dynamic_pointer_cast<Value>(expression->eval(env)) != nullptr )
     if (exp != nullptr )
     {
-        //auto exp = expression->eval(env);
-        //return std::dynamic_pointer_cast<Number>(exp);
         return exp;
     }
     else

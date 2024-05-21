@@ -59,12 +59,7 @@ void Test::ExpressionTest()
     std::shared_ptr<Expression> func2 = std::make_shared<Function>(sum1);
 
     print.execute(nullptr,"\nPower, Trigonometrics, ln: ");
-    display.execute(func2/*->eval(emptyEnv)*/);
-
-    /*std::shared_ptr<Expression> eq = std::make_shared<Equation>(func,func2);
-
-    print.execute(nullptr,"\nEquation: ");
-    display.execute(eq);*/
+    display.execute(func2);
 
     std::shared_ptr<Expression> to = std::make_shared<Number>(0);
     std::shared_ptr<Expression> tf = std::make_shared<Number>(10);
