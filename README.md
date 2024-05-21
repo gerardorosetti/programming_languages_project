@@ -17,6 +17,7 @@ The execution of the project will show a variety of tests (Example show bellow).
 
 ![image](https://github.com/gerardorosetti/programming_languages_project/assets/74148975/d86ee0d1-1486-4c38-ba60-612adf3b1b7c)
 
+In the 'Mathematical Programming Languaje.pdf' will be found more information about the language implementation.
 
 ## Credits
 [s0ymiranda] https://github.com/s0ymiranda
