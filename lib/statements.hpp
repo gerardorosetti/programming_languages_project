@@ -5,28 +5,24 @@
 class Statement
 {
 public:
-    virtual void execute(std::shared_ptr<Expression>, std::string) const = 0;
+    virtual void execute() const = 0;
     virtual ~Statement() {}
 };
 
 class Display : public Statement
 {
 public:
-    static Display& getInstance();
-    void execute(std::shared_ptr<Expression>, std::string name = "") const override;
+    Display(std::shared_ptr<Expression>);
+    void execute() const override;
 private:
-    Display() {}
-    Display(const Display&) = delete;
-    Display& operator= (const Display&) = delete;
+    std::shared_ptr<Expression> exp;
 };
 
 class Print :public Statement
 {
 public:
-    static Print& getInstance();
-    void execute(std::shared_ptr<Expression>, std::string toPrint) const override;
+    Print(std::string);
+    void execute() const override;
 private:
-    Print() {}
-    Print(const Print&) = delete;
-    Print& operator= (const Print&) = delete;
+    std::string str;
 };

@@ -18,7 +18,7 @@ Impossible::Impossible() : Value(DataType::Impossible) {}
 
 std::shared_ptr<Expression> Impossible::eval(Environment& env) const
 {
-    return std::shared_ptr<Impossible>();
+    return std::make_shared<Impossible>();
 }
 std::string Impossible::toString() const noexcept
 {
